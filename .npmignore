@@ -1,4 +1,6 @@
 example
+src/index.test.js
+
 ## the src folder
 src
 .babelrc
