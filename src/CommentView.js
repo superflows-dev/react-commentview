@@ -21,8 +21,6 @@ export const CommentView = (props) => {
 
     const theme = Themes.getTheme("Default");
 
-    console.log('Theme', theme);
-
     function setFlowWrap(flow, timeout = 500) {
         setTimeout(() => {setFlow(flow)}, timeout);
     }
@@ -83,12 +81,14 @@ export const CommentView = (props) => {
             event.preventDefault();
             submitResult();
         } else {
+            setTextNew(refInputNew.current.value);
             validateSubmit();
         }
     }
 
     function onEmojiChosen(event, obj) {
         refInputNew.current.value = refInputNew.current.value + obj.emoji;
+        setTextNew(refInputNew.current.value)
     }
 
     function openEmojiPicker(value) {
@@ -115,9 +115,28 @@ export const CommentView = (props) => {
 
         if(flow === Constants.FLOW_INIT || flow === Constants.FLOW_UPLOAD_COMPLETE) {
             refInputNew.current.focus();
+            refInputNew.current.value = textNew;
         }
 
     }, [flow])
+
+    useEffect(() => {
+
+        console.log('prefille', props.preFill);
+        if(props.preFill != null) {
+            setTextNew(props.preFill.text);
+            if(refInputNew.current != null) {
+                refInputNew.current.value = props.preFill.text;
+            }
+
+            if(props.preFill.attachment != null) {
+                setUploadResult(props.preFill.attachment.object);
+                setUploadType(props.preFill.attachment.type);
+                setFlowWrap(Constants.FLOW_UPLOAD_COMPLETE);
+            }
+        }
+
+    }, [])
 
     return (
 
