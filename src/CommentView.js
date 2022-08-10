@@ -122,7 +122,6 @@ export const CommentView = (props) => {
 
     useEffect(() => {
 
-        console.log('prefille', props.preFill);
         if(props.preFill != null) {
             setTextNew(props.preFill.text);
             if(refInputNew.current != null) {
