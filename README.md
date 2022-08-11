@@ -8,28 +8,44 @@
 
 - **Reusable** - It can be integrated easily into your react application, in any place, where a comment input is required
 - **Responsive** - UI is designed in bootstrap and is fully responsive
+- **View Mode & Edit Mode** - This component can be rendered in two modes - view & edit
 - **Image Upload** - Along with text input, it also supports image attachments (preview & cropping integrated)
 - **PDF Upload** - Along with text input, it also supports pdf attachments (preview integrated)
 - **Video Upload** - Along with text input, it also supports video attachments (preview & clipping integrated)
 - **Emoji** - More than 1100 standard emojis are available to choose from
 
+## Modes
+
+### View Mode
+
+View mode looks like the image below.
+
+<img src="https://user-images.githubusercontent.com/108924653/184130496-df814e26-708b-4014-959c-c31d4b9a58ea.png" width="300"/></a>
+
+### Edit Mode
+
+Edit mode looks like the image below.
+
+<img src="https://user-images.githubusercontent.com/108924653/184131257-08819de2-ebac-41e4-90b2-50fb239111a8.png" width="300"/></a>
+
+
 ## Demos
 
 ### Emoji integration
 
-<a href="https://youtu.be/1LOhjp61PZo"><img src="https://user-images.githubusercontent.com/108924653/183871991-350371ec-80c9-4661-ab28-b7100de21907.png" width="300"/></a>
+<a href="https://youtu.be/l5KTLUQpnP8"><img src="https://user-images.githubusercontent.com/108924653/184135974-68401ada-dd34-4c1e-9ad5-4d4c23ae9dd9.png" width="300"/></a>
 
 ### Image uploader integration
 
-<a href="https://youtu.be/gPTFRAGS8q4"><img src="https://user-images.githubusercontent.com/108924653/183872019-91f179d6-098f-4a76-a209-a83b7fadf9e3.png" width="300"/></a>
+<a href="https://youtu.be/MZM0oy5-Kkw"><img src="https://user-images.githubusercontent.com/108924653/184136018-c5830075-4fb1-4c1a-83d2-0f5730e00906.png" width="300"/></a>
 
 ### Video uploader integration
 
-<a href="https://youtu.be/EIipPc-9JTo"><img src="https://user-images.githubusercontent.com/108924653/183872118-ccdf4fc0-6622-4438-93e3-f2b5a53cf572.png" width="300"/></a>
+<a href="https://youtu.be/DVUTUP7XY58"><img src="https://user-images.githubusercontent.com/108924653/184136167-02ce05a2-4dab-4306-ac61-42d83e36b943.png" width="300"/></a>
 
 ### PDF uploader integration
 
-<a href="https://youtu.be/4pKNNZbwCi8"><img src="https://user-images.githubusercontent.com/108924653/183872076-f1dbdde7-36aa-443a-a801-149f4cd771e6.png" width="300"/></a>
+<a href="https://youtu.be/UAW6q85YtHs"><img src="https://user-images.githubusercontent.com/108924653/184136123-f1f7267c-9124-466f-9861-2a27ab5aa3d3.png" width="300"/></a>
 
 
 ## Install
@@ -160,7 +176,8 @@ Once you are through with installing the dependencies and the AWS configuration,
 - awsMediaConvertEndPoint: AWS region specific mediaconvert endpoint
 - mediaConvertRole: Media convert role
 - onSubmit: Submit callback
-- prefill: Data to prefill, set attachment to null if only text needs to be prefilled
+- user: User information to be showed in the comment view
+- prefill: Data to prefill, set attachment to null if only text needs to be prefilled (optional)
 - theme: UI Theme (optional)
 
 ```jsx
@@ -186,11 +203,12 @@ const App = () => {
             awsMediaConvertEndPoint="awsEndpoint"
             type="video"
             mediaConvertRole="mediaconvert_role"
+            user={{id: 2, name: "Hrushi M", picture: "https://image.shutterstock.com/mosaic_250/2780032/1714666150/stock-photo-head-shot-portrait-close-up-smiling-confident-businessman-wearing-glasses-looking-at-camera-1714666150.jpg", timestamp: "1660215594"}}
             onSubmit={(result) => {
               console.log('submit result', result);
             }}
             preFill={{text: 'Hello there!', attachment: {
-              type: 'image', object: 'mybucket/filename.png'
+              type: 'image', object: 'superflows-myuploads/image_1659529344235.jpeg'
             }}}
             theme={theme}
           />

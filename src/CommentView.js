@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { useState, useRef } from "react";
 import { Col, Row, Container, Button } from 'react-bootstrap';
-import { CardImage, EmojiSmile, Paperclip, PlayBtn, XCircle, FilePdf, Trash, FileImage, FilePlay, Keyboard } from 'react-bootstrap-icons';
+import { CardImage, EmojiSmile, Paperclip, PlayBtn, XCircle, FilePdf, Trash, FileImage, FilePlay, Keyboard, ArrowUpRightSquare, Image, Dot, ArrowRight } from 'react-bootstrap-icons';
 import { ButtonNeutral, ButtonNext } from 'react-ui-components-superflows';
 import { UploadToS3 } from 'react-upload-to-s3';
 import { Constants } from './Constants';
@@ -46,6 +46,28 @@ export const CommentView = (props) => {
         setFlowWrap(Constants.FLOW_INIT);
     }
 
+    function onClickAttachment() {
+
+        let url = '';
+
+        const strArr = uploadResult.split("/");
+        if(props.cdnPrefix == null) {
+            url = 'https://' + props.bucket + ".s3." + props.awsRegion + ".amazonaws.com/" + strArr[1];
+        } else {
+            let lastCh = props.cdnPrefix;
+            lastCh = lastCh.slice(-1);
+            console.log(lastCh);
+            if(lastCh == "/") {
+                url = props.cdnPrefix + strArr[1];
+            } else {
+                url = props.cdnPrefix + "/" + strArr[1];
+            }
+            
+         }
+
+        window.open(url)
+    }
+
     function validateSubmit() {
 
         if(refInputNew.current != null) {
@@ -71,7 +93,8 @@ export const CommentView = (props) => {
             attachment: uploadResult == '' ? null : {
                 object: uploadResult,
                 type: uploadType
-            }
+            },
+            user: props.user
         });
     }
 
@@ -122,25 +145,39 @@ export const CommentView = (props) => {
 
     useEffect(() => {
 
-        if(props.preFill != null) {
-            setTextNew(props.preFill.text);
-            if(refInputNew.current != null) {
-                refInputNew.current.value = props.preFill.text;
-            }
 
+        if(props.mode === Constants.MODE_EDIT) {
+            if(props.preFill != null) {
+                setTextNew(props.preFill.text);
+                if(refInputNew.current != null) {
+                    refInputNew.current.value = props.preFill.text;
+                }
+    
+                if(props.preFill.attachment != null) {
+                    setUploadResult(props.preFill.attachment.object);
+                    setUploadType(props.preFill.attachment.type);
+                    setFlowWrap(Constants.FLOW_UPLOAD_COMPLETE);
+                }
+            }    
+        } else {
+            if(props.preFill != null) {
+                setTextNew(props.preFill.text);
+            }
             if(props.preFill.attachment != null) {
                 setUploadResult(props.preFill.attachment.object);
                 setUploadType(props.preFill.attachment.type);
-                setFlowWrap(Constants.FLOW_UPLOAD_COMPLETE);
             }
+            setFlowWrap(Constants.FLOW_VIEW);
         }
 
-    }, [])
+        
+
+    }, [props.mode])
 
     return (
 
         <div style={{position: 'relative'}}>
-            <Container className="w-100 rounded-3 d-flex flex-column px-2"
+            <Container className="w-100 rounded-3 d-flex flex-column px-3 pb-2"
             style={{
                 border: 'solid 1px',
                 borderColor: props.theme != null ? props.theme.commentViewBorderColor : theme.commentViewBorderColor,
@@ -148,8 +185,40 @@ export const CommentView = (props) => {
             }}
             >
 
-                {(flow === Constants.FLOW_INIT || flow === Constants.FLOW_UPLOAD_COMPLETE || flow === Constants.FLOW_EMOJI_PICKER) && <Container className='d-flex flex-column flex-grow-1 p-0'>
-                    <textarea ref={refInputNew} className='rounded-3 flex-grow-1 border-0 mt-2'  style={{
+                <div className="d-flex align-items-center mt-3 mb-0 p-0" role="alert">
+
+                    <div className='me-2' style={{width: '40px', height: '40px', backgroundImage: `url(${props.user.picture})`, backgroundSize: 'cover', backgroundRepeat: 'no-repeat', backgroundPosition: 'center', borderRadius: '40px'}} ></div>
+                    <div><b>{props.user.name}</b></div>
+                    {flow == Constants.FLOW_VIEW && <Dot />}
+                    {flow == Constants.FLOW_VIEW && <div className='ms-1' style={{color: 'gray'}}><small>{Util.timeDifference(new Date().getTime(), parseInt(props.user.timestamp)*1000)}</small></div>}
+
+                </div>
+
+                {flow == Constants.FLOW_VIEW && <Container className='d-flex flex-column flex-grow-1 p-0'>
+                    <div className='py-2' style={{color: '#444444'}}>
+                        {
+                            textNew
+                        }
+                    </div>
+                    {uploadResult.length > 0 && <div className='d-flex'>
+                        <div className="d-flex align-items-center mb-0 px-0 pt-0 pb-2" role="alert" style={{cursor: 'pointer'}} onClick={() => {onClickAttachment()}}>
+                            {uploadType == Constants.UPLOAD_TYPE_PDF && <FilePdf className='me-2'/>}
+                            {uploadType == Constants.UPLOAD_TYPE_IMAGE && <Image className='me-2'/>}
+                            {uploadType == Constants.UPLOAD_TYPE_VIDEO && <FilePlay className='me-2'/>}
+                            <div>
+                                <small>
+                                {
+                                    Util.ellipsizeStart(uploadResult, 15)
+                                }
+                                </small>
+                            </div>
+                            <div className='ms-2' style={{color: 'gray'}}><small><small><ArrowRight /> </small></small></div>
+                        </div>
+                    </div>}
+                </Container>}
+                
+                {(flow === Constants.FLOW_INIT || flow === Constants.FLOW_UPLOAD_COMPLETE || flow === Constants.FLOW_EMOJI_PICKER) && <Container className='d-flex flex-column flex-grow-1 p-0 my-1'>
+                    <textarea ref={refInputNew} className='rounded-3 flex-grow-1 border-0 mt-2 py-1 px-2'  style={{
                 height: windowDimensions.height > windowDimensions.width ? '150px' : '150px'
             }} onChange={()=>{}} onKeyUp={(event) => {onTextAreaKeyUp(event)}}></textarea>
                 </Container>}
@@ -188,7 +257,7 @@ export const CommentView = (props) => {
                     {(flow === Constants.FLOW_INIT) && <Button className="btn-image" variant='btn-outline-secondary me-4' onClick={() => {prepareUpload(Constants.UPLOAD_TYPE_IMAGE)}} style={{color: props.theme != null ? props.theme.commentViewColor : theme.commentViewColor}}>
                         <CardImage />
                     </Button>}
-                    {(flow === Constants.FLOW_INIT || flow === Constants.FLOW_UPLOAD_COMPLETE) && <ButtonNeutral caption="Submit"  custom={{backgroundColor: props.theme != null ? props.theme.commentViewSubmitButtonBackgroundColor : theme.commentViewSubmitButtonBackgroundColor, color: props.theme != null ? props.theme.commentViewSubmitButtonColor : theme.commentViewSubmitButtonColor}} onClick={() => {submitResult()}} disabled={disableSubmit}/>}
+                    {(flow === Constants.FLOW_INIT || flow === Constants.FLOW_UPLOAD_COMPLETE) && <ButtonNeutral caption="Submit"  custom={{backgroundColor: props.theme != null ? props.theme.commentViewSubmitButtonBackgroundColor : theme.commentViewSubmitButtonBackgroundColor, color: props.theme != null ? props.theme.commentViewSubmitButtonColor : theme.commentViewSubmitButtonColor}} onClick={() => {submitResult()}} disabled={disableSubmit} icon="ArrowRight"/>}
                 </Container>}
 
                 {flow === Constants.FLOW_UPLOAD && <Container className='d-flex flex-row justify-content-end align-items-center ps-0 pe-0 pt-2 pb-2'>
