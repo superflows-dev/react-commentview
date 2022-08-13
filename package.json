@@ -1,6 +1,6 @@
 {
   "name": "react-commentview",
-  "version": "1.0.5",
+  "version": "1.0.8",
   "description": "A reusable react component to show comments or discussions on a particular topic",
   "author": "superflows-dev",
   "license": "MIT",
@@ -56,7 +56,7 @@
     "react-bootstrap-icons": "^1.8.4",
     "react-ui-components-superflows": "^1.0.29",
     "react-ui-themes-superflows": "^1.0.13",
-    "react-upload-to-s3": "^1.0.9"
+    "react-upload-to-s3": "^1.0.11"
   },
   "files": [
     "dist"

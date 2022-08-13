@@ -56,7 +56,6 @@ export const CommentView = (props) => {
         } else {
             let lastCh = props.cdnPrefix;
             lastCh = lastCh.slice(-1);
-            console.log(lastCh);
             if(lastCh == "/") {
                 url = props.cdnPrefix + strArr[1];
             } else {
@@ -128,6 +127,21 @@ export const CommentView = (props) => {
 
     }
 
+    function onEditClicked() {
+        if(uploadResult != null && uploadResult.length > 0) {
+            setFlowWrap(Constants.FLOW_UPLOAD_COMPLETE);
+        } else {
+            setFlowWrap(Constants.FLOW_INIT);
+        }
+
+    }
+
+    function onDeleteClicked() {
+        if(props.onDelete != null) {
+            props.onDelete(props.preFill.id);
+        }
+    }
+
     useEffect(() => {
 
         validateSubmit();
@@ -145,9 +159,9 @@ export const CommentView = (props) => {
 
     useEffect(() => {
 
-
         if(props.mode === Constants.MODE_EDIT) {
             if(props.preFill != null) {
+                
                 setTextNew(props.preFill.text);
                 if(refInputNew.current != null) {
                     refInputNew.current.value = props.preFill.text;
@@ -158,12 +172,14 @@ export const CommentView = (props) => {
                     setUploadType(props.preFill.attachment.type);
                     setFlowWrap(Constants.FLOW_UPLOAD_COMPLETE);
                 }
+
             }    
         } else {
+
             if(props.preFill != null) {
                 setTextNew(props.preFill.text);
             }
-            if(props.preFill.attachment != null) {
+            if(props.preFill != null && props.preFill.attachment != null) {
                 setUploadResult(props.preFill.attachment.object);
                 setUploadType(props.preFill.attachment.type);
             }
@@ -200,7 +216,7 @@ export const CommentView = (props) => {
                             textNew
                         }
                     </div>
-                    {uploadResult.length > 0 && <div className='d-flex'>
+                    {uploadResult.length > 0 && <div className='d-flex justify-content-between'>
                         <div className="d-flex align-items-center mb-0 px-0 pt-0 pb-2" role="alert" style={{cursor: 'pointer'}} onClick={() => {onClickAttachment()}}>
                             {uploadType == Constants.UPLOAD_TYPE_PDF && <FilePdf className='me-2'/>}
                             {uploadType == Constants.UPLOAD_TYPE_IMAGE && <Image className='me-2'/>}
@@ -213,6 +229,17 @@ export const CommentView = (props) => {
                                 </small>
                             </div>
                             <div className='ms-2' style={{color: 'gray'}}><small><small><ArrowRight /> </small></small></div>
+                        </div>
+                        <div>
+                            {(props.showEdit != null && props.showEdit) && <Button className="button_edit" onClick={() => {onEditClicked()}} variant="btn btn-outline"><small>Edit</small></Button>}
+                            {(props.showDelete != null && props.showDelete) && <Button className="button_delete" onClick={() => {onDeleteClicked()}} variant="btn btn-outline ms-2"><small>Delete</small></Button>}
+                        </div>
+                    </div>}
+                    {uploadResult.length === 0 && <div className='d-flex justify-content-between'>
+                        <div></div>
+                        <div>
+                            {(props.showEdit != null && props.showEdit) && <Button className="button_edit" onClick={() => {onEditClicked()}} variant="btn btn-outline">Edit</Button>}
+                            {(props.showDelete != null && props.showDelete) && <Button className="button_delete" onClick={() => {onDeleteClicked()}} variant="btn btn-outline ms-2"><small>Delete</small></Button>}
                         </div>
                     </div>}
                 </Container>}
@@ -244,7 +271,7 @@ export const CommentView = (props) => {
                 </Container>}
 
                 {(flow === Constants.FLOW_INIT || flow === Constants.FLOW_UPLOAD_COMPLETE || flow === Constants.FLOW_EMOJI_PICKER) && <Container className='d-flex flex-row justify-content-end align-items-center ps-0 pe-0 pt-2 pb-2'>
-                    {(flow === Constants.FLOW_INIT) && <Button className="btn-emoji" variant='btn-outline-secondary me-2' onClick={() => {openEmojiPicker(true)}} style={{color: props.theme != null ? props.theme.commentViewColor : theme.commentViewColor}}>
+                    {(flow === Constants.FLOW_INIT || flow === Constants.FLOW_UPLOAD_COMPLETE) && <Button className="btn-emoji" variant='btn-outline-secondary me-2' onClick={() => {openEmojiPicker(true)}} style={{color: props.theme != null ? props.theme.commentViewColor : theme.commentViewColor}}>
                         <EmojiSmile/>
                     </Button>}
                     <div className='flex-grow-1'  style={{visibility: 'hidden'}}/>

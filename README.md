@@ -11,7 +11,7 @@
 - **View Mode & Edit Mode** - This component can be rendered in two modes - view & edit
 - **Image Upload** - Along with text input, it also supports image attachments (preview & cropping integrated)
 - **PDF Upload** - Along with text input, it also supports pdf attachments (preview integrated)
-- **Video Upload** - Along with text input, it also supports video attachments (preview & clipping integrated)
+- **Video Upload** - Along with text input, it also supports video attachments (preview, thumbnail generation & clipping integrated)
 - **Emoji** - More than 1100 standard emojis are available to choose from
 
 ## Modes
@@ -41,7 +41,7 @@ Edit mode looks like the image below.
 
 ### Video uploader integration
 
-<a href="https://youtu.be/DVUTUP7XY58"><img src="https://user-images.githubusercontent.com/108924653/184136167-02ce05a2-4dab-4306-ac61-42d83e36b943.png" width="300"/></a>
+<a href="https://youtu.be/eevHmGbphV8"><img src="https://user-images.githubusercontent.com/108924653/184136167-02ce05a2-4dab-4306-ac61-42d83e36b943.png" width="300"/></a>
 
 ### PDF uploader integration
 
@@ -175,7 +175,11 @@ Once you are through with installing the dependencies and the AWS configuration,
 - awsSecret: AWS Secret (should come from environment variables)
 - awsMediaConvertEndPoint: AWS region specific mediaconvert endpoint
 - mediaConvertRole: Media convert role
+- showEdit: Flag, which sets the visility of the edit button (edit button changes the mode from view to edit) (optional)
+- showDelete: Flag, which sets the visibility of the delete button (optional)
+- cdnPrefix: If you bucket is behind a cdn, then explicitly provide a prefix, (optional)
 - onSubmit: Submit callback
+- onDelete: Delete callback
 - user: User information to be showed in the comment view
 - prefill: Data to prefill, set attachment to null if only text needs to be prefilled (optional)
 - theme: UI Theme (optional)
@@ -196,20 +200,20 @@ const App = () => {
       <Row className="justify-content-center">
         <Col sm={12} xs={12} md={6} xxl={6}>
           <CommentView
-            bucket="superflows-myuploads"
+            bucket="awsBucket"
             awsRegion="awsRegion"
-            awsKey="awsKey"
+            awsKey="awsAccessKey"
             awsSecret="awsSecret"
-            awsMediaConvertEndPoint="awsEndpoint"
+            awsMediaConvertEndPoint="https://********.mediaconvert.<awsRegion>.amazonaws.com"
             type="video"
+            mode="edit"
+            showEdit={true}
+            showDelete={true}
             mediaConvertRole="mediaconvert_role"
             user={{id: 2, name: "Hrushi M", picture: "https://image.shutterstock.com/mosaic_250/2780032/1714666150/stock-photo-head-shot-portrait-close-up-smiling-confident-businessman-wearing-glasses-looking-at-camera-1714666150.jpg", timestamp: "1660215594"}}
-            onSubmit={(result) => {
-              console.log('submit result', result);
-            }}
-            preFill={{text: 'Hello there!', attachment: {
-              type: 'image', object: 'superflows-myuploads/image_1659529344235.jpeg'
-            }}}
+            cdnPrefix="https://<prefix url>"
+            onSubmit={(result) => {console.log('submit result', result);}}
+            onDelete={(result) => {console.log('delete result', result);}}
             theme={theme}
           />
         </Col>
@@ -225,24 +229,30 @@ export default App;
 
 ## Tests
 
-PASS src/index.test.js (14.775s)
-  ✓ McqView: Render of Newtext Editor (42ms)
-  ✓ McqView: Render of Uploader (6037ms)
-  ✓ McqView: Render of Emoji picker (5149ms)
+PASS src/index.test.js (18.193s)
+✓ CommentView: Render of blank edit mode (33ms)
+✓ CommentView: Render of prefilled edit mode without attachment (10ms)
+✓ CommentView: Render of prefilled edit mode with attachment (10ms)
+✓ CommentView: Render of prefilled view mode without attachment, edit and delete (1050ms)
+✓ CommentView: Render of prefilled view mode with attachment and without edit and delete (1032ms)
+✓ CommentView: Render of prefilled view mode with attachment and with edit and delete (1030ms)
+✓ CommentView: Render of Uploader (6038ms)
+✓ CommentView: Render of Emoji picker (5151ms)
+✓ CommentView: Switching from View Mode To Edit Mode (2057ms)
 
 ----------------|----------|----------|----------|----------|-------------------|
 File            |  % Stmts | % Branch |  % Funcs |  % Lines | Uncovered Line #s |
 ----------------|----------|----------|----------|----------|-------------------|
-All files       |    62.69 |    56.32 |    62.96 |    63.08 |                   |
- CommentView.js |    63.33 |    57.65 |       64 |    63.79 |... 37,150,174,186 |
+All files       |     65.6 |    65.33 |    59.46 |    65.85 |                   |
+ CommentView.js |    64.36 |    67.39 |    55.88 |    64.65 |... 54,267,291,303 |
  Constants.js   |      100 |      100 |      100 |      100 |                   |
- Util.js        |       50 |        0 |       50 |       50 |             4,5,7 |
+ Util.js        |    69.57 |    41.67 |      100 |    69.57 |... 33,37,44,45,49 |
  index.js       |        0 |        0 |        0 |        0 |                   |
 ----------------|----------|----------|----------|----------|-------------------|
 Test Suites: 1 passed, 1 total
-Tests:       3 passed, 3 total
+Tests:       9 passed, 9 total
 Snapshots:   0 total
-Time:        16.159s
+Time:        18.874s
 Ran all test suites.
 
 ## License
