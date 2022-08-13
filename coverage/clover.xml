@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1660393314010" clover="3.2.0">
-  <project timestamp="1660393314010" name="All files">
+<coverage generated="1660418877158" clover="3.2.0">
+  <project timestamp="1660418877158" name="All files">
     <metrics statements="118" coveredstatements="77" conditionals="150" coveredconditionals="98" methods="37" coveredmethods="22" elements="305" coveredelements="197" complexity="0" loc="118" ncloc="118" packages="1" files="4" classes="4"/>
     <file name="CommentView.js" path="/Users/admin/Documents/GitHub/react-commentview/src/CommentView.js">
       <metrics statements="94" coveredstatements="60" conditionals="138" coveredconditionals="93" methods="34" coveredmethods="19"/>

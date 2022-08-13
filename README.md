@@ -205,7 +205,6 @@ const App = () => {
             awsKey="awsAccessKey"
             awsSecret="awsSecret"
             awsMediaConvertEndPoint="https://********.mediaconvert.<awsRegion>.amazonaws.com"
-            type="video"
             mode="edit"
             showEdit={true}
             showDelete={true}
