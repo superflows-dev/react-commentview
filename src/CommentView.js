@@ -97,6 +97,7 @@ export const CommentView = (props) => {
             user: props.user,
             callbackInfo: props.callbackInfo == null ? null : props.callbackInfo
         });
+        setFlowWrap(Constants.FLOW_VIEW);
     }
 
     function onTextAreaKeyUp(event) {
