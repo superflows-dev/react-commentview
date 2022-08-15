@@ -231,15 +231,15 @@ export default App;
 ## Tests
 
 PASS src/index.test.js (18.193s)
-✓ CommentView: Render of blank edit mode (33ms)
-✓ CommentView: Render of prefilled edit mode without attachment (10ms)
-✓ CommentView: Render of prefilled edit mode with attachment (10ms)
-✓ CommentView: Render of prefilled view mode without attachment, edit and delete (1050ms)
-✓ CommentView: Render of prefilled view mode with attachment and without edit and delete (1032ms)
-✓ CommentView: Render of prefilled view mode with attachment and with edit and delete (1030ms)
-✓ CommentView: Render of Uploader (6038ms)
-✓ CommentView: Render of Emoji picker (5151ms)
-✓ CommentView: Switching from View Mode To Edit Mode (2057ms)
+- ✓ CommentView: Render of blank edit mode (33ms)
+- ✓ CommentView: Render of prefilled edit mode without attachment (10ms)
+- ✓ CommentView: Render of prefilled edit mode with attachment (10ms)
+- ✓ CommentView: Render of prefilled view mode without attachment, edit and delete (1050ms)
+- ✓ CommentView: Render of prefilled view mode with attachment and without edit and delete (1032ms)
+- ✓ CommentView: Render of prefilled view mode with attachment and with edit and delete (1030ms)
+- ✓ CommentView: Render of Uploader (6038ms)
+- ✓ CommentView: Render of Emoji picker (5151ms)
+- ✓ CommentView: Switching from View Mode To Edit Mode (2057ms)
 
 ----------------|----------|----------|----------|----------|-------------------|
 File            |  % Stmts | % Branch |  % Funcs |  % Lines | Uncovered Line #s |
