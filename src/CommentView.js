@@ -16,6 +16,7 @@ export const CommentView = (props) => {
     const [uploadResult, setUploadResult] = useState('');
     const [flow, setFlow] = useState(Constants.FLOW_INIT);
     const [textNew, setTextNew] = useState('');
+    const [textOriginal, setTextOriginal] = useState('');
     const refInputNew = useRef(null);
     const [disableSubmit, setDisableSubmit] = useState(true);
 
@@ -137,6 +138,7 @@ export const CommentView = (props) => {
     }
 
     function onCancelClicked() {
+        setTextNew(textOriginal);
         setFlowWrap(Constants.FLOW_VIEW);
     }
 
@@ -193,6 +195,14 @@ export const CommentView = (props) => {
         
 
     }, [props.mode])
+
+    useEffect(() => {
+
+        if(props.preFill != null) {
+            setTextOriginal(props.preFill.text);
+        }
+
+    }, [])
 
     return (
 
