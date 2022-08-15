@@ -203,7 +203,7 @@ export const CommentView = (props) => {
             setTextOriginal(props.preFill.text);
         }
 
-    }, [])
+    }, [props.preFill?.text])
 
     return (
 
