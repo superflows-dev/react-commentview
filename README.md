@@ -212,6 +212,7 @@ const App = () => {
             showEdit={true}
             showDelete={true}
             showCancel={true}
+            deleted={false}
             preFill={{text: 'Hello how you are'}}
             callbackInfo={{id: 10}}
             mediaConvertRole="mediaconvert_role"

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { useState, useRef } from "react";
 import { Col, Row, Container, Button } from 'react-bootstrap';
-import { CardImage, EmojiSmile, Paperclip, PlayBtn, XCircle, FilePdf, Trash, FileImage, FilePlay, Keyboard, ArrowUpRightSquare, Image, Dot, ArrowRight } from 'react-bootstrap-icons';
+import { CardImage, EmojiSmile, Paperclip, PlayBtn, XCircle, FilePdf, Trash, FileImage, FilePlay, Keyboard, ArrowUpRightSquare, Image, Dot, ArrowRight, SlashCircle } from 'react-bootstrap-icons';
 import { ButtonNeutral, ButtonNext } from 'react-ui-components-superflows';
 import { UploadToS3 } from 'react-upload-to-s3';
 import { Constants } from './Constants';
@@ -19,6 +19,7 @@ export const CommentView = (props) => {
     const [textOriginal, setTextOriginal] = useState('');
     const refInputNew = useRef(null);
     const [disableSubmit, setDisableSubmit] = useState(true);
+    const [deleteTimeoutHandler, setDeleteTimeoutHandler] = useState(null);
 
     const theme = Themes.getTheme("Default");
 
@@ -145,9 +146,16 @@ export const CommentView = (props) => {
     }
 
     function onDeleteClicked() {
-        if(props.onDelete != null) {
-            props.onDelete(props.callbackInfo);
+
+        if(flow === Constants.FLOW_VIEW) {
+            setFlowWrap(Constants.FLOW_CONFIRM_DELETE)
+        } else {
+            if(props.onDelete != null) {
+                props.onDelete(props.callbackInfo);
+            }
+            setFlowWrap(Constants.FLOW_DELETED)
         }
+
     }
 
     useEffect(() => {
@@ -156,11 +164,26 @@ export const CommentView = (props) => {
 
     }, [uploadResult])
     
+
     useEffect(() => {
 
         if(flow === Constants.FLOW_INIT || flow === Constants.FLOW_UPLOAD_COMPLETE) {
             refInputNew.current.focus();
             refInputNew.current.value = textNew;
+        }
+
+        if(flow === Constants.FLOW_CONFIRM_DELETE) {
+
+            setDeleteTimeoutHandler(setTimeout(() => {
+                if(flow === Constants.FLOW_CONFIRM_DELETE) {
+                    setFlowWrap(Constants.FLOW_VIEW)
+                }
+            }, 5000));
+
+        }
+
+        if(flow === Constants.FLOW_DELETED) {
+            clearTimeout(deleteTimeoutHandler);
         }
 
     }, [flow])
@@ -182,7 +205,7 @@ export const CommentView = (props) => {
                 }
 
             }    
-        } else {
+        } else if(props.mode === Constants.MODE_VIEW){
 
             if(props.preFill != null) {
                 setTextNew(props.preFill.text);
@@ -192,6 +215,9 @@ export const CommentView = (props) => {
                 setUploadType(props.preFill.attachment.type);
             }
             setFlowWrap(Constants.FLOW_VIEW);
+
+        } else {
+            setFlowWrap(Constants.FLOW_DELETED);
         }
 
         
@@ -205,6 +231,7 @@ export const CommentView = (props) => {
         }
 
     }, [props.preFill?.text])
+
 
     return (
 
@@ -228,13 +255,24 @@ export const CommentView = (props) => {
 
                 </div>
 
-                {flow == Constants.FLOW_VIEW && <Container className='d-flex flex-column flex-grow-1 p-0'>
+                {flow == Constants.FLOW_DELETED && <Container className='d-flex flex-column flex-grow-1 p-0'>
+
+                    <div className='py-2' style={{color: '#777777'}}>
+                        <SlashCircle className='me-2' />
+                        {
+                            Constants.CONTENT_DELETED
+                        }
+                    </div>
+
+                </Container>}
+                
+                {(flow == Constants.FLOW_VIEW || flow == Constants.FLOW_CONFIRM_DELETE) && <Container className='d-flex flex-column flex-grow-1 p-0'>
                     <div className='py-2' style={{color: '#444444'}}>
                         {
                             textNew
                         }
                     </div>
-                    {uploadResult.length > 0 && <div className='d-flex justify-content-between'>
+                    {(uploadResult.length > 0) && <div className='d-flex justify-content-between'>
                         <div className="d-flex align-items-center mb-0 px-0 pt-0 pb-2" role="alert" style={{cursor: 'pointer'}} onClick={() => {onClickAttachment()}}>
                             {uploadType == Constants.UPLOAD_TYPE_PDF && <FilePdf className='me-2'/>}
                             {uploadType == Constants.UPLOAD_TYPE_IMAGE && <Image className='me-2'/>}
@@ -253,11 +291,16 @@ export const CommentView = (props) => {
                             {(props.showDelete != null && props.showDelete) && <Button className="button_delete" onClick={() => {onDeleteClicked()}} variant="btn btn-outline ms-2"><small>Delete</small></Button>}
                         </div>
                     </div>}
-                    {uploadResult.length === 0 && <div className='d-flex justify-content-between'>
+                    {(uploadResult.length === 0) && <div className='d-flex justify-content-between'>
                         <div></div>
                         <div>
                             {(props.showEdit != null && props.showEdit) && <Button className="button_edit" onClick={() => {onEditClicked()}} variant="btn btn-outline"><small>Edit</small></Button>}
                             {(props.showDelete != null && props.showDelete) && <Button className="button_delete" onClick={() => {onDeleteClicked()}} variant="btn btn-outline ms-2"><small>Delete</small></Button>}
+                        </div>
+                    </div>}
+                    {(flow === Constants.FLOW_CONFIRM_DELETE) && <div className='d-flex justify-content-end text-muted'>
+                        <div>
+                            <small>Press again to delete</small>
                         </div>
                     </div>}
                 </Container>}
