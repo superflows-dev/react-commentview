@@ -177,6 +177,7 @@ Once you are through with installing the dependencies and the AWS configuration,
 - mediaConvertRole: Media convert role
 - showEdit: Flag, which sets the visility of the edit button (edit button changes the mode from view to edit) (optional)
 - showDelete: Flag, which sets the visibility of the delete button (optional)
+- showCancel: Flag, which sets the visibility of the cancel button (cancel button changes the mode from edit to view) (optional)
 - cdnPrefix: If you bucket is behind a cdn, then explicitly provide a prefix, (optional)
 - onSubmit: Submit callback
 - onDelete: Delete callback
@@ -208,6 +209,7 @@ const App = () => {
             mode="edit"
             showEdit={true}
             showDelete={true}
+            showCancel={true}
             mediaConvertRole="mediaconvert_role"
             user={{id: 2, name: "Hrushi M", picture: "https://image.shutterstock.com/mosaic_250/2780032/1714666150/stock-photo-head-shot-portrait-close-up-smiling-confident-businessman-wearing-glasses-looking-at-camera-1714666150.jpg", timestamp: "1660215594"}}
             cdnPrefix="https://<prefix url>"

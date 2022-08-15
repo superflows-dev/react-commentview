@@ -136,6 +136,10 @@ export const CommentView = (props) => {
 
     }
 
+    function onCancelClicked() {
+        setFlowWrap(Constants.FLOW_VIEW);
+    }
+
     function onDeleteClicked() {
         if(props.onDelete != null) {
             props.onDelete(props.preFill.id);
@@ -207,6 +211,8 @@ export const CommentView = (props) => {
                     <div><b>{props.user.name}</b></div>
                     {flow == Constants.FLOW_VIEW && <Dot />}
                     {flow == Constants.FLOW_VIEW && <div className='ms-1' style={{color: 'gray'}}><small>{Util.timeDifference(new Date().getTime(), parseInt(props.user.timestamp)*1000)}</small></div>}
+                    {((flow == Constants.FLOW_INIT || flow == Constants.FLOW_UPLOAD_COMPLETE) && props.showCancel != null && props.showCancel) && <Dot />}
+                    {((flow == Constants.FLOW_INIT || flow == Constants.FLOW_UPLOAD_COMPLETE) && props.showCancel != null && props.showCancel) && <Button className="button_cancel" onClick={() => {onCancelClicked()}} variant="btn btn-outline"><small>Cancel</small></Button>}
 
                 </div>
 
@@ -238,7 +244,7 @@ export const CommentView = (props) => {
                     {uploadResult.length === 0 && <div className='d-flex justify-content-between'>
                         <div></div>
                         <div>
-                            {(props.showEdit != null && props.showEdit) && <Button className="button_edit" onClick={() => {onEditClicked()}} variant="btn btn-outline">Edit</Button>}
+                            {(props.showEdit != null && props.showEdit) && <Button className="button_edit" onClick={() => {onEditClicked()}} variant="btn btn-outline"><small>Edit</small></Button>}
                             {(props.showDelete != null && props.showDelete) && <Button className="button_delete" onClick={() => {onDeleteClicked()}} variant="btn btn-outline ms-2"><small>Delete</small></Button>}
                         </div>
                     </div>}
