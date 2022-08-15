@@ -179,6 +179,8 @@ Once you are through with installing the dependencies and the AWS configuration,
 - showDelete: Flag, which sets the visibility of the delete button (optional)
 - showCancel: Flag, which sets the visibility of the cancel button (cancel button changes the mode from edit to view) (optional)
 - cdnPrefix: If you bucket is behind a cdn, then explicitly provide a prefix, (optional)
+- preFill: text and attachment information to prefill
+- callbackInfo: information that needs to be sent back on callbacks
 - onSubmit: Submit callback
 - onDelete: Delete callback
 - user: User information to be showed in the comment view
@@ -210,6 +212,8 @@ const App = () => {
             showEdit={true}
             showDelete={true}
             showCancel={true}
+            preFill={{text: 'Hello how you are'}}
+            callbackInfo={{id: 10}}
             mediaConvertRole="mediaconvert_role"
             user={{id: 2, name: "Hrushi M", picture: "https://image.shutterstock.com/mosaic_250/2780032/1714666150/stock-photo-head-shot-portrait-close-up-smiling-confident-businessman-wearing-glasses-looking-at-camera-1714666150.jpg", timestamp: "1660215594"}}
             cdnPrefix="https://<prefix url>"

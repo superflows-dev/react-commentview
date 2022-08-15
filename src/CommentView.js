@@ -94,7 +94,8 @@ export const CommentView = (props) => {
                 object: uploadResult,
                 type: uploadType
             },
-            user: props.user
+            user: props.user,
+            callbackInfo: props.callbackInfo == null ? null : props.callbackInfo
         });
     }
 
@@ -144,7 +145,7 @@ export const CommentView = (props) => {
 
     function onDeleteClicked() {
         if(props.onDelete != null) {
-            props.onDelete(props.preFill.id);
+            props.onDelete(props.callbackInfo);
         }
     }
 
@@ -324,8 +325,6 @@ export const CommentView = (props) => {
             </Container>
             
         </div>
-        
-        
 
     )
 }
