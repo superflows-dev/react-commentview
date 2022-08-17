@@ -4,29 +4,46 @@
 
 [![NPM](https://img.shields.io/npm/v/react-commentview.svg)](https://www.npmjs.com/package/react-commentview) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
+## What's New
+
+- Likes & Dislikes
+- Upvotes & Downvotes
+
 ## Features
 
 - **Reusable** - It can be integrated easily into your react application, in any place, where a comment input is required
 - **Responsive** - UI is designed in bootstrap and is fully responsive
-- **View Mode & Edit Mode** - This component can be rendered in two modes - view & edit
+
+## Functionality
+
+- **Text Comments** - Text area component to accept textual input
+- **Emoji Support** - More than 1100 standard emojis are available to choose from
 - **Image Upload** - Along with text input, it also supports image attachments (preview & cropping integrated)
 - **PDF Upload** - Along with text input, it also supports pdf attachments (preview integrated)
 - **Video Upload** - Along with text input, it also supports video attachments (preview, thumbnail generation & clipping integrated)
-- **Emoji** - More than 1100 standard emojis are available to choose from
+- **Likes & Dislikes** - Allow users to like or dislike (optional)
+- **UpVotes & Downvotes** - Allow users to upvote or downvote (optional)
+- **Share** - Allow users to share (optional)
 
-## Modes
+## Modes of operation
 
 ### View Mode
 
 View mode looks like the image below.
 
-<img src="https://user-images.githubusercontent.com/108924653/184130496-df814e26-708b-4014-959c-c31d4b9a58ea.png" width="300"/></a>
+<img src="https://user-images.githubusercontent.com/108924653/185089071-182d79da-bd79-452e-bd82-ade77a894ca4.png" width="300"/></a>
 
 ### Edit Mode
 
 Edit mode looks like the image below.
 
 <img src="https://user-images.githubusercontent.com/108924653/184131257-08819de2-ebac-41e4-90b2-50fb239111a8.png" width="300"/></a>
+
+### Deleted Mode
+
+Deleted mode looks like the image below.
+
+<img src="https://user-images.githubusercontent.com/108924653/184696101-db982c87-475a-450f-a70e-02b8074ddb74.png" width="300"/></a>
 
 
 ## Demos
@@ -175,14 +192,37 @@ Once you are through with installing the dependencies and the AWS configuration,
 - awsSecret: AWS Secret (should come from environment variables)
 - awsMediaConvertEndPoint: AWS region specific mediaconvert endpoint
 - mediaConvertRole: Media convert role
+- mode: view / edit / deleted
 - showEdit: Flag, which sets the visility of the edit button (edit button changes the mode from view to edit) (optional)
 - showDelete: Flag, which sets the visibility of the delete button (optional)
 - showCancel: Flag, which sets the visibility of the cancel button (cancel button changes the mode from edit to view) (optional)
+- showLikes: Flag, which sets the visibility of the like button
+- showDisLikes: Flag, which sets the visibility of the dislike button
+- showVotes: Flag, which sets the visibility of votes
+- showShare: Flag, which sets the visibility of the share button
+- likes: Number of likes
+- disLikes: Number of dislikes
+- upVotes: Number of upvotes
+- downVotes: Number of downvotes
+- iHaveLiked: Flag, which shows the like button as like or not liked
+- iHaveDisLiked: Flag, which shows the dislike button as dislike or not disliked
+- iHaveUpVoted: Flag, which shows the upvote button as upvote or upvoted
+- iHaveDownVoted: Flag, which shows the downvote button as downvote or downvoted
 - cdnPrefix: If you bucket is behind a cdn, then explicitly provide a prefix, (optional)
 - preFill: text and attachment information to prefill
 - callbackInfo: information that needs to be sent back on callbacks
 - onSubmit: Submit callback
 - onDelete: Delete callback
+- onLiked: Like callback
+- onLikeRemoved: Like remove callback
+- onDisLiked: Dislike callback
+- onDisLikeRemoved: Dislike removed callback
+- onReplied: Reply callback
+- onShared: Share callback
+- onUpVoted: Upvote callback
+- onUpVoteRemoved: Upvote removed callback
+- onDownVoted: Downvote callback
+- onDownVoteRemoved: Downvote removed callback
 - user: User information to be showed in the comment view
 - prefill: Data to prefill, set attachment to null if only text needs to be prefilled (optional)
 - theme: UI Theme (optional)
@@ -208,18 +248,39 @@ const App = () => {
             awsKey="awsAccessKey"
             awsSecret="awsSecret"
             awsMediaConvertEndPoint="https://********.mediaconvert.<awsRegion>.amazonaws.com"
+            mediaConvertRole="mediaconvert_role"
             mode="edit"
+            showCancel={true}
             showEdit={true}
             showDelete={true}
-            showCancel={true}
-            deleted={false}
-            preFill={{text: 'Hello how you are'}}
+            showLikes={true}
+            showDisLikes={true}
+            showVotes={true}
+            showShare={true}
+            likes={22}
+            disLikes={5}
+            upVotes={21}
+            downVotes={4}
+            iHaveLiked={true}
+            iHaveDisLiked={true}
+            iHaveUpVoted={false}
+            iHaveDownVoted={true}
+            preFill={{text: 'Hello how are things going?'}}
             callbackInfo={{id: 10}}
-            mediaConvertRole="mediaconvert_role"
             user={{id: 2, name: "Hrushi M", picture: "https://image.shutterstock.com/mosaic_250/2780032/1714666150/stock-photo-head-shot-portrait-close-up-smiling-confident-businessman-wearing-glasses-looking-at-camera-1714666150.jpg", timestamp: "1660215594"}}
             cdnPrefix="https://<prefix url>"
             onSubmit={(result) => {console.log('submit result', result);}}
             onDelete={(result) => {console.log('delete result', result);}}
+            onLiked={(result) => {console.log('liked result', result);}}
+            onLikeRemoved={(result) => {console.log('like removed result', result);}}
+            onDisLiked={(result) => {console.log('liked result', result);}}
+            onDisLikeRemoved={(result) => {console.log('dislike removed result', result);}}
+            onReplied={(result) => {console.log('reply result', result);}}
+            onShared={(result) => {console.log('share result', result);}}
+            onUpVoted={(result) => {console.log('upvoted result', result);}}
+            onUpVoteRemoved={(result) => {console.log('upvote removed result', result);}}
+            onDownVoted={(result) => {console.log('downvoted result', result);}}
+            onDownVoteRemoved={(result) => {console.log('downvote removed result', result);}}
             theme={theme}
           />
         </Col>
@@ -235,30 +296,32 @@ export default App;
 
 ## Tests
 
-PASS src/index.test.js (18.193s)
-- ✓ CommentView: Render of blank edit mode (33ms)
-- ✓ CommentView: Render of prefilled edit mode without attachment (10ms)
+PASS src/index.test.js (40.333s)
+- ✓ CommentView: Render of blank edit mode (37ms)
+- ✓ CommentView: Render of prefilled edit mode without attachment (9ms)
 - ✓ CommentView: Render of prefilled edit mode with attachment (10ms)
-- ✓ CommentView: Render of prefilled view mode without attachment, edit and delete (1050ms)
-- ✓ CommentView: Render of prefilled view mode with attachment and without edit and delete (1032ms)
-- ✓ CommentView: Render of prefilled view mode with attachment and with edit and delete (1030ms)
-- ✓ CommentView: Render of Uploader (6038ms)
-- ✓ CommentView: Render of Emoji picker (5151ms)
-- ✓ CommentView: Switching from View Mode To Edit Mode (2057ms)
+- ✓ CommentView: Render of prefilled view mode without attachment, edit and delete (1009ms)
+- ✓ CommentView: Render of prefilled view mode with attachment and without edit and delete (1013ms)
+- ✓ CommentView: Render of prefilled view mode with attachment and with edit and delete (1013ms)
+- ✓ CommentView: Render of Uploader (6042ms)
+- ✓ CommentView: Render of Emoji picker (5147ms)
+- ✓ CommentView: Switching from View Mode To Edit Mode (2036ms)
+- ✓ CommentView: Render Likes (11064ms)
+- ✓ CommentView: Render Votes (11069ms)
 
 ----------------|----------|----------|----------|----------|-------------------|
 File            |  % Stmts | % Branch |  % Funcs |  % Lines | Uncovered Line #s |
 ----------------|----------|----------|----------|----------|-------------------|
-All files       |     65.6 |    65.33 |    59.46 |    65.85 |                   |
- CommentView.js |    64.36 |    67.39 |    55.88 |    64.65 |... 54,267,291,303 |
+All files       |    70.63 |    67.83 |     66.2 |     70.8 |                   |
+ CommentView.js |    70.61 |    68.98 |    64.71 |     70.8 |... 74,587,611,623 |
  Constants.js   |      100 |      100 |      100 |      100 |                   |
  Util.js        |    69.57 |    41.67 |      100 |    69.57 |... 33,37,44,45,49 |
  index.js       |        0 |        0 |        0 |        0 |                   |
 ----------------|----------|----------|----------|----------|-------------------|
 Test Suites: 1 passed, 1 total
-Tests:       9 passed, 9 total
+Tests:       11 passed, 11 total
 Snapshots:   0 total
-Time:        18.874s
+Time:        41s
 Ran all test suites.
 
 ## License
