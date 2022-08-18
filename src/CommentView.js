@@ -31,9 +31,18 @@ export const CommentView = (props) => {
     const [downVotes, setDownVotes] = useState(true);
     const [iHaveUpVoted, setIHaveUpVoted] = useState(false);
     const [iHaveDownVoted, setIHaveDownVoted] = useState(false);
+    const [callbackInfo, setCallbackInfo] = useState(false);
 
     const refInputNew = useRef(null);
     const theme = Themes.getTheme("Default");
+
+    function setCallbackInfoWrap(value) {
+        setCallbackInfo(JSON.stringify(value));
+    }
+
+    function getCallbackInfoWrap() {
+        return JSON.parse(callbackInfo);
+    }
 
     function setFlowWrap(flow, timeout = 500) {
         setTimeout(() => {setFlow(flow)}, timeout);
@@ -163,7 +172,7 @@ export const CommentView = (props) => {
             setFlowWrap(Constants.FLOW_CONFIRM_DELETE)
         } else {
             if(props.onDelete != null) {
-                props.onDelete(props.callbackInfo);
+                props.onDelete(getCallbackInfoWrap());
             }
             setFlowWrap(Constants.FLOW_DELETED)
         }
@@ -172,20 +181,20 @@ export const CommentView = (props) => {
 
     function onReplyClicked() {
         if(props.onReplied != null) {
-            props.onReplied(props.callbackInfo);
+            props.onReplied(getCallbackInfoWrap());
         }
     }
 
     function onShareClicked() {
         if(props.onShared != null) {
-            props.onShared(props.callbackInfo);
+            props.onShared(getCallbackInfoWrap());
         }
     }
     
     function onLiked() {
         if(!iHaveDisLiked) {
             if(props.onLiked != null) {
-                props.onLiked(props.callbackInfo);
+                props.onLiked(getCallbackInfoWrap());
             }
             setLikes(likes + 1);
             setIHaveLiked(true);
@@ -195,7 +204,7 @@ export const CommentView = (props) => {
     function onDisLiked() {
         if(!iHaveLiked) {
             if(props.onDisLiked != null) {
-                props.onDisLiked(props.callbackInfo);
+                props.onDisLiked(getCallbackInfoWrap());
             }
             setDisLikes(disLikes + 1);
             setIHaveDisLiked(true);
@@ -207,7 +216,7 @@ export const CommentView = (props) => {
             setFlowWrap(Constants.FLOW_CONFIRM_REMOVE_LIKE)
         } else {
             if(props.onLikeRemoved != null) {
-                props.onLikeRemoved(props.callbackInfo);
+                props.onLikeRemoved(getCallbackInfoWrap());
             }
             setLikes(likes - 1);
             setIHaveLiked(false);
@@ -221,7 +230,7 @@ export const CommentView = (props) => {
             setFlowWrap(Constants.FLOW_CONFIRM_REMOVE_DISLIKE)
         } else {
             if(props.onDisLikeRemoved != null) {
-                props.onDisLikeRemoved(props.callbackInfo);
+                props.onDisLikeRemoved(getCallbackInfoWrap());
             }
             setDisLikes(disLikes - 1);
             setIHaveDisLiked(false);
@@ -232,7 +241,7 @@ export const CommentView = (props) => {
     function onUpVoted() {
         if(!iHaveDownVoted) {
             if(props.onUpVoted != null) {
-                props.onUpVoted(props.callbackInfo);
+                props.onUpVoted(getCallbackInfoWrap());
             }
             setUpVotes(upVotes + 1);
             setIHaveUpVoted(true);
@@ -242,7 +251,7 @@ export const CommentView = (props) => {
     function onDownVoted() {
         if(!iHaveUpVoted) {
             if(props.onDownVoted != null) {
-                props.onDownVoted(props.callbackInfo);
+                props.onDownVoted(getCallbackInfoWrap());
             }
             setDownVotes(downVotes + 1);
             setIHaveDownVoted(true);
@@ -254,7 +263,7 @@ export const CommentView = (props) => {
             setFlowWrap(Constants.FLOW_CONFIRM_REMOVE_UPVOTE)
         } else {
             if(props.onUpVoteRemoved != null) {
-                props.onUpVoteRemoved(props.callbackInfo);
+                props.onUpVoteRemoved(getCallbackInfoWrap());
             }
             setUpVotes(upVotes - 1);
             setIHaveUpVoted(false);
@@ -268,7 +277,7 @@ export const CommentView = (props) => {
             setFlowWrap(Constants.FLOW_CONFIRM_REMOVE_DOWNVOTE)
         } else {
             if(props.onDownVoteRemoved != null) {
-                props.onDownVoteRemoved(props.callbackInfo);
+                props.onDownVoteRemoved(getCallbackInfoWrap());
             }
             setDownVotes(downVotes - 1);
             setIHaveDownVoted(false);
@@ -400,6 +409,27 @@ export const CommentView = (props) => {
 
     useEffect(() => {
 
+        if(props.mode == Constants.MODE_EDIT) {
+            if(props.attachment == null) {
+                setFlowWrap(Constants.FLOW_INIT)
+            } else {
+                setFlowWrap(Constants.FLOW_UPLOAD_COMPLETE)
+            }
+            
+        }
+
+        if(props.mode == Constants.MODE_VIEW) {
+            setFlowWrap(Constants.FLOW_VIEW)
+        }
+
+        if(props.mode == Constants.MODE_DELETED) {
+            setFlowWrap(Constants.FLOW_DELETED)
+        }
+
+    }, [props.mode])
+
+    useEffect(() => {
+
         if(props.preFill != null) {
             setTextOriginal(props.preFill.text);
         }
@@ -438,6 +468,9 @@ export const CommentView = (props) => {
         setIHaveDownVoted(props.iHaveDownVoted)
     }, [props.iHaveDownVoted])
 
+    useEffect(() => {
+        setCallbackInfoWrap(props.callbackInfo)
+    }, [props.callbackInfo])
     return (
 
         <div style={{position: 'relative'}}>
@@ -479,8 +512,8 @@ export const CommentView = (props) => {
                             {!iHaveUpVoted && <CaretUp className="button_upvote text-muted" onClick={()=>{onUpVoted()}} style={{cursor: 'pointer'}}/>}
                         </small>
                         <small>
-                            {(iHaveUpVoted || iHaveDownVoted) && <span style={{color: "black"}}>{props.upVotes - props.downVotes}</span>}
-                            {(!iHaveUpVoted && !iHaveDownVoted) && <span className='text-muted'>{props.upVotes - props.downVotes}</span>}
+                            {(iHaveUpVoted || iHaveDownVoted) && <span style={{color: "black"}}>{upVotes - downVotes}</span>}
+                            {(!iHaveUpVoted && !iHaveDownVoted) && <span className='text-muted'>{upVotes - downVotes}</span>}
                         </small> 
                         <small>
                             {iHaveDownVoted && <CaretDownFill className="button_downvoted" onClick={() => {onDownVoteRemoved()}} style={{cursor: 'pointer'}}/>}
@@ -598,7 +631,7 @@ export const CommentView = (props) => {
                 </Container>}
 
                 {(flow === Constants.FLOW_INIT || flow === Constants.FLOW_UPLOAD_COMPLETE || flow === Constants.FLOW_EMOJI_PICKER) && <Container className='d-flex flex-row justify-content-end align-items-center ps-0 pe-0 pt-2 pb-2'>
-                    {(flow === Constants.FLOW_INIT || flow === Constants.FLOW_UPLOAD_COMPLETE) && <Button className="btn-emoji" variant='btn-outline-secondary me-2' onClick={() => {openEmojiPicker(true)}} style={{color: props.theme != null ? props.theme.commentViewColor : theme.commentViewColor}}>
+                    {(flow === Constants.FLOW_INIT || flow === Constants.FLOW_UPLOAD_COMPLETE) && <Button className="btn_emoji" variant='btn-outline-secondary me-2' onClick={() => {openEmojiPicker(true)}} style={{color: props.theme != null ? props.theme.commentViewColor : theme.commentViewColor}}>
                         <EmojiSmile/>
                     </Button>}
                     <div className='flex-grow-1'  style={{visibility: 'hidden'}}/>
