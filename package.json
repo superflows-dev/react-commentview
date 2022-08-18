@@ -1,6 +1,6 @@
 {
   "name": "react-commentview",
-  "version": "1.0.28",
+  "version": "1.0.30",
   "description": "A reusable react component to show comments or discussions on a particular topic",
   "author": "superflows-dev",
   "license": "MIT",

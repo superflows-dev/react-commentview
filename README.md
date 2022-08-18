@@ -193,6 +193,7 @@ Once you are through with installing the dependencies and the AWS configuration,
 - awsMediaConvertEndPoint: AWS region specific mediaconvert endpoint
 - mediaConvertRole: Media convert role
 - mode: view / edit / deleted
+- edited: Flag, which sets the visibility of the edited marker
 - showEdit: Flag, which sets the visility of the edit button (edit button changes the mode from view to edit) (optional)
 - showDelete: Flag, which sets the visibility of the delete button (optional)
 - showCancel: Flag, which sets the visibility of the cancel button (cancel button changes the mode from edit to view) (optional)
@@ -250,6 +251,7 @@ const App = () => {
             awsMediaConvertEndPoint="https://********.mediaconvert.<awsRegion>.amazonaws.com"
             mediaConvertRole="mediaconvert_role"
             mode="edit"
+            edited={true}
             showCancel={true}
             showEdit={true}
             showDelete={true}

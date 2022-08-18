@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { useState, useRef } from "react";
-import { Col, Row, Container, Button } from 'react-bootstrap';
-import { CardImage, EmojiSmile, Paperclip, PlayBtn, XCircle, FilePdf, Trash, FileImage, FilePlay, Keyboard, ArrowUpRightSquare, Image, Dot, ArrowRight, SlashCircle, HandThumbsUp, HandThumbsDown, HandThumbsDownFill, HandThumbsUpFill, Share, CaretUp, CaretDown, CaretUpFill, CaretDownFill } from 'react-bootstrap-icons';
+import { Col, Row, Container, Button, Overlay } from 'react-bootstrap';
+import { CardImage, EmojiSmile, Paperclip, PlayBtn, XCircle, FilePdf, Trash, FileImage, FilePlay, Keyboard, ArrowUpRightSquare, Image, Dot, ArrowRight, SlashCircle, HandThumbsUp, HandThumbsDown, HandThumbsDownFill, HandThumbsUpFill, Share, CaretUp, CaretDown, CaretUpFill, CaretDownFill, ThreeDotsVertical, X, ArrowRightShort, Plus, Dash, ChevronExpand, ChevronContract, ChevronDown, ChevronUp } from 'react-bootstrap-icons';
 import { ButtonNeutral, ButtonNext } from 'react-ui-components-superflows';
 import { UploadToS3 } from 'react-upload-to-s3';
 import { Constants } from './Constants';
@@ -15,6 +15,7 @@ export const CommentView = (props) => {
     const [uploadType, setUploadType] = useState(Constants.UPLOAD_TYPE_IMAGE);
     const [uploadResult, setUploadResult] = useState('');
     const [flow, setFlow] = useState(Constants.FLOW_VIEW);
+    const [edited, setEdited] = useState(false);
     const [textNew, setTextNew] = useState('');
     const [textOriginal, setTextOriginal] = useState('');
     const [disableSubmit, setDisableSubmit] = useState(true);
@@ -34,6 +35,7 @@ export const CommentView = (props) => {
     const [callbackInfo, setCallbackInfo] = useState(false);
 
     const refInputNew = useRef(null);
+    const refPopup = useRef(null);
     const theme = Themes.getTheme("Default");
 
     function setCallbackInfoWrap(value) {
@@ -42,6 +44,16 @@ export const CommentView = (props) => {
 
     function getCallbackInfoWrap() {
         return JSON.parse(callbackInfo);
+    }
+
+    function showEdit(value) {
+
+        if(value) {
+            setFlowWrap(Constants.FLOW_SHOW_EDIT)
+        } else {
+            setFlowWrap(Constants.FLOW_VIEW)
+        }
+
     }
 
     function setFlowWrap(flow, timeout = 500) {
@@ -471,10 +483,14 @@ export const CommentView = (props) => {
     useEffect(() => {
         setCallbackInfoWrap(props.callbackInfo)
     }, [props.callbackInfo])
+
+    useEffect(() => {
+        setEdited(props.edited);
+    }, [props.edited])
     return (
 
         <div style={{position: 'relative'}}>
-            <Container className="w-100 rounded-3 d-flex flex-column px-3 pb-2"
+            <Container className="w-100 rounded-3 d-flex flex-column px-3 pb-3"
             style={{
                 border: 'solid 1px',
                 borderColor: props.theme != null ? props.theme.commentViewBorderColor : theme.commentViewBorderColor,
@@ -482,16 +498,28 @@ export const CommentView = (props) => {
             }}
             >
 
-                <div className="d-flex align-items-center mt-3 mb-0 p-0" role="alert">
+                <div className="d-flex align-items-center justify-content-between mt-3 mb-0 p-0" role="alert">
 
-                    <div className='me-2' style={{width: '40px', height: '40px', backgroundImage: `url(${props.user.picture})`, backgroundSize: 'cover', backgroundRepeat: 'no-repeat', backgroundPosition: 'center', borderRadius: '40px'}} ></div>
-                    <div><b>{props.user.name}</b></div>
-                    {(flow == Constants.FLOW_VIEW || flow == Constants.FLOW_CONFIRM_DELETE || flow == Constants.FLOW_CONFIRM_REMOVE_LIKE || flow == Constants.FLOW_CONFIRM_REMOVE_DISLIKE || flow == Constants.FLOW_CONFIRM_REMOVE_UPVOTE || flow == Constants.FLOW_CONFIRM_REMOVE_DOWNVOTE) && <Dot />}
-                    {(flow == Constants.FLOW_VIEW || flow == Constants.FLOW_CONFIRM_DELETE || flow == Constants.FLOW_CONFIRM_REMOVE_LIKE || flow == Constants.FLOW_CONFIRM_REMOVE_DISLIKE || flow == Constants.FLOW_CONFIRM_REMOVE_UPVOTE || flow == Constants.FLOW_CONFIRM_REMOVE_DOWNVOTE) && props.timestamp != null && <div className='ms-1' style={{color: 'gray'}}><small>{Util.timeDifference(new Date().getTime(), parseInt(props.user.timestamp)*1000)}</small></div>}
-                    {((flow == Constants.FLOW_INIT || flow == Constants.FLOW_UPLOAD_COMPLETE) && props.showCancel != null && props.showCancel) && <Dot />}
-                    {((flow == Constants.FLOW_INIT || flow == Constants.FLOW_UPLOAD_COMPLETE) && props.showCancel != null && props.showCancel) && <Button className="button_cancel" onClick={() => {onCancelClicked()}} variant="btn btn-outline"><small>Cancel</small></Button>}
+                    <div className='d-flex align-items-center'>
+                        <div className='me-2' style={{width: '40px', height: '40px', backgroundImage: `url(${props.user.picture})`, backgroundSize: 'cover', backgroundRepeat: 'no-repeat', backgroundPosition: 'center', borderRadius: '40px'}} ></div>
+                        <div><b>{props.user.name}</b></div>
+                        {(flow == Constants.FLOW_VIEW || flow == Constants.FLOW_CONFIRM_DELETE || flow == Constants.FLOW_CONFIRM_REMOVE_LIKE || flow == Constants.FLOW_CONFIRM_REMOVE_DISLIKE || flow == Constants.FLOW_CONFIRM_REMOVE_UPVOTE || flow == Constants.FLOW_CONFIRM_REMOVE_DOWNVOTE) && <Dot />}
+                        {((flow == Constants.FLOW_INIT || flow == Constants.FLOW_UPLOAD_COMPLETE) && props.showCancel != null && props.showCancel) && <Dot />}
+                        {((flow == Constants.FLOW_INIT || flow == Constants.FLOW_UPLOAD_COMPLETE) && props.showCancel != null && props.showCancel) && <Button className="button_cancel" onClick={() => {onCancelClicked()}} variant="btn btn-outline"><small>Cancel</small></Button>}
+                    </div>
+                    {((flow == Constants.FLOW_VIEW || flow == Constants.FLOW_CONFIRM_DELETE || flow == Constants.FLOW_CONFIRM_REMOVE_LIKE || flow == Constants.FLOW_CONFIRM_REMOVE_DISLIKE || flow == Constants.FLOW_CONFIRM_REMOVE_UPVOTE || flow == Constants.FLOW_CONFIRM_REMOVE_DOWNVOTE) && ((props.showEdit != null && props.showEdit) || (props.showDelete != null && props.showDelete))) && <div className='button_show_edit d-flex me-2' ref={refPopup} onClick={() => {showEdit(true)}} style={{cursor: 'pointer'}}><ChevronDown /></div>}
+                    {((flow == Constants.FLOW_SHOW_EDIT) && ((props.showEdit != null && props.showEdit) || (props.showDelete != null && props.showDelete))) && <div className='button_show_edit d-flex me-2' ref={refPopup} onClick={() => {showEdit(false)}} style={{cursor: 'pointer'}}><ChevronUp /></div>}
 
                 </div>
+
+                {flow == Constants.FLOW_SHOW_EDIT && <div className='d-flex justify-content-between'>
+                    <div></div>
+                    <div>
+                        {(props.showEdit != null && props.showEdit) && <Button className="button_edit text-muted" onClick={() => {onEditClicked()}} variant="btn btn-outline"><small><small>Edit</small></small></Button>}
+                        {(props.showDelete != null && props.showDelete) && <Button className="button_delete  text-muted" onClick={() => {onDeleteClicked()}} variant="btn btn-outline"><small><small>Delete</small></small></Button>}
+                    </div>
+                </div>}
+
 
                 {flow == Constants.FLOW_DELETED && <Container className='d-flex flex-column flex-grow-1 p-0'>
 
@@ -504,7 +532,7 @@ export const CommentView = (props) => {
 
                 </Container>}
                 
-                {(flow == Constants.FLOW_VIEW || flow == Constants.FLOW_CONFIRM_DELETE || flow == Constants.FLOW_CONFIRM_REMOVE_LIKE || flow == Constants.FLOW_CONFIRM_REMOVE_DISLIKE || flow == Constants.FLOW_CONFIRM_REMOVE_UPVOTE || flow == Constants.FLOW_CONFIRM_REMOVE_DOWNVOTE) && <Container className='d-flex p-0'>
+                {(flow == Constants.FLOW_VIEW || flow == Constants.FLOW_CONFIRM_DELETE || flow == Constants.FLOW_CONFIRM_REMOVE_LIKE || flow == Constants.FLOW_CONFIRM_REMOVE_DISLIKE || flow == Constants.FLOW_CONFIRM_REMOVE_UPVOTE || flow == Constants.FLOW_CONFIRM_REMOVE_DOWNVOTE || flow == Constants.FLOW_SHOW_EDIT) && <Container className='d-flex p-0'>
 
                     {props.showVotes && <div className='d-flex flex-column justify-content-start align-items-center py-2' style={{width: '45px',marginRight: '7px'}}>
                         <small>
@@ -542,15 +570,21 @@ export const CommentView = (props) => {
                                 <div className='ms-2' style={{color: 'gray'}}><small><small><ArrowRight /> </small></small></div>
                             </div>
                         </div>}
-                        {(props.showLikes || props.showDisLikes) && <div className='d-flex justify-content-between align-items-center text-muted'>
-                            <Button className="button_reply text-muted ps-0 pe-0 py-0 me-4" onClick={() => {onReplyClicked()}} variant="btn btn-outline"><small>Reply</small></Button>
+                        {(props.showLikes || props.showDisLikes) && <div className='d-flex justify-content-end align-items-center text-muted'>
                             
-                            <div className='d-flex'>
-                                {props.showShare && <div className='d-flex justify-content-start align-items-center me-5'>
-                                    <small>
-                                        <span style={{color: '#444', cursor: 'pointer'}}><Share style={{marginBottom: '2px'}} onClick={() => {onShareClicked()}}/></span>
-                                    </small>
-                                </div>}
+                            <Button className="button_reply ps-0 pe-0 py-0 me-2" onClick={() => {onReplyClicked()}} variant="btn btn-outline"><small>Reply</small></Button>
+                            {props.showShare && <Dot />}
+                            {props.showShare && <Button className="button_reply ps-0 pe-0 py-0 ms-2 me-2" onClick={() => {onShareClicked()}} variant="btn btn-outline"><small>Share</small></Button>}
+                        
+                        </div>}
+                        {(props.showLikes || props.showDisLikes) && <div className='d-flex justify-content-start align-items-center text-muted mt-2'>
+                            
+                            <div className='d-flex w-100 justify-content-end align-items-center'>
+                                
+                                {props.user.timestamp != null && <div style={{color: 'gray'}} className="me-3"><small><small>{Util.timeDifference(new Date().getTime(), parseInt(props.user.timestamp)*1000)}</small></small></div>}
+                                {edited &&  <Dot className='me-2'/>}
+                                {edited && <Button className="button_reply ps-0 pe-0 py-0 me-2" disabled={true} variant="btn btn-link"><small><small>Edited</small></small></Button>}
+                                {edited &&  <Dot className='me-2'/>}
                                 {props.showLikes && <div className='d-flex justify-content-start align-items-center me-4'>
                                     <small>
                                         {(iHaveLiked) && <span style={{color: '#444'}}><HandThumbsUpFill className='button_liked me-2' style={{marginBottom: '2px', color: '#444', cursor: 'pointer'}} onClick={() => {onLikeRemoved()}}/>{likes}</span>}
@@ -565,9 +599,6 @@ export const CommentView = (props) => {
                                 </div>}
                             </div>
                         </div>}
-                        {(!props.showLikes && !props.showDisLikes) && <div className='d-flex justify-content-between align-items-center text-muted'>
-                            <Button className="button_reply text-muted ps-0 pe-0 py-0 me-4" onClick={() => {onReplyClicked()}} variant="btn btn-outline"><small>Reply</small></Button>
-                        </div>}
                         {(flow === Constants.FLOW_CONFIRM_REMOVE_LIKE) && <div className='d-flex justify-content-end text-muted'>
                             <div>
                                 <small><small><small>Press again to remove like</small></small></small>
@@ -578,13 +609,6 @@ export const CommentView = (props) => {
                                 <small><small><small>Press again to remove dislike</small></small></small>
                             </div>
                         </div>}
-                        <div className='d-flex justify-content-between'>
-                            <div></div>
-                            <div>
-                                {(props.showEdit != null && props.showEdit) && <Button className="button_edit  text-muted " onClick={() => {onEditClicked()}} variant="btn btn-outline"><small><small>Edit</small></small></Button>}
-                                {(props.showDelete != null && props.showDelete) && <Button className="button_delete  text-muted" onClick={() => {onDeleteClicked()}} variant="btn btn-outline ms-2"><small><small>Delete</small></small></Button>}
-                            </div>
-                        </div>
                         {(flow === Constants.FLOW_CONFIRM_DELETE) && <div className='d-flex justify-content-end text-muted'>
                             <div>
                                 <small><small><small>Press again to delete</small></small></small>
