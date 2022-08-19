@@ -31,7 +31,7 @@
 
 View mode looks like the image below.
 
-<img src="https://user-images.githubusercontent.com/108924653/185089071-182d79da-bd79-452e-bd82-ade77a894ca4.png" width="300"/></a>
+<img src="https://user-images.githubusercontent.com/108924653/185604711-fe0b58ae-3132-4829-a5b5-a12c330538cc.png" width="300"/></a>
 
 ### Edit Mode
 
@@ -210,6 +210,7 @@ Once you are through with installing the dependencies and the AWS configuration,
 - iHaveUpVoted: Flag, which shows the upvote button as upvote or upvoted
 - iHaveDownVoted: Flag, which shows the downvote button as downvote or downvoted
 - cdnPrefix: If you bucket is behind a cdn, then explicitly provide a prefix, (optional)
+- replyTo: text and username that populates the replied to section
 - preFill: text and attachment information to prefill
 - callbackInfo: information that needs to be sent back on callbacks
 - onSubmit: Submit callback
@@ -224,6 +225,7 @@ Once you are through with installing the dependencies and the AWS configuration,
 - onUpVoteRemoved: Upvote removed callback
 - onDownVoted: Downvote callback
 - onDownVoteRemoved: Downvote removed callback
+- onReplyTo: Replied to callback
 - user: User information to be showed in the comment view
 - prefill: Data to prefill, set attachment to null if only text needs to be prefilled (optional)
 - theme: UI Theme (optional)
@@ -283,6 +285,7 @@ const App = () => {
             onUpVoteRemoved={(result) => {console.log('upvote removed result', result);}}
             onDownVoted={(result) => {console.log('downvoted result', result);}}
             onDownVoteRemoved={(result) => {console.log('downvote removed result', result);}}
+            onReplyTo={(result) => {console.log('reply to result', result);}}
             theme={theme}
           />
         </Col>

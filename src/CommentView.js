@@ -297,6 +297,12 @@ export const CommentView = (props) => {
         }
     }
 
+    function onReplyToClicked() {
+        if(props.onReplyTo != null) {
+            props.onReplyTo(getCallbackInfoWrap());
+        }
+    }
+
 
     useEffect(() => {
 
@@ -550,6 +556,22 @@ export const CommentView = (props) => {
                     </div>}
 
                     <Container className='d-flex flex-column flex-grow-1 p-0'>
+                        {props.replyTo != null && <div className='p-2 rounded-3' style={{backgroundColor: theme.commentViewReplyBackgroundColor, color: '#666666', borderLeftWidth: '5px', borderLeftColor: '#888888', borderLeftStyle: 'solid', cursor: 'pointer'}} onClick={() => {onReplyToClicked()}}>
+                            <div>
+                                <b>
+                                {
+                                    props.replyTo.userName
+                                }    
+                                </b>
+                            </div>
+                            <div>
+                                <small>
+                                {
+                                    props.replyTo.text.substring(0, 20)
+                                }    
+                                </small>
+                            </div>
+                        </div>}
                         <div className='py-3' style={{color: '#444444'}}>
                             {
                                 textNew
