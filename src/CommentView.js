@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { useState, useRef } from "react";
 import { Col, Row, Container, Button, Overlay } from 'react-bootstrap';
-import { CardImage, EmojiSmile, Paperclip, PlayBtn, XCircle, FilePdf, Trash, FileImage, FilePlay, Keyboard, ArrowUpRightSquare, Image, Dot, ArrowRight, SlashCircle, HandThumbsUp, HandThumbsDown, HandThumbsDownFill, HandThumbsUpFill, Share, CaretUp, CaretDown, CaretUpFill, CaretDownFill, ThreeDotsVertical, X, ArrowRightShort, Plus, Dash, ChevronExpand, ChevronContract, ChevronDown, ChevronUp } from 'react-bootstrap-icons';
+import { CardImage, EmojiSmile, Paperclip, PlayBtn, XCircle, FilePdf, Trash, FileImage, FilePlay, Keyboard, ArrowUpRightSquare, Image, Dot, ArrowRight, SlashCircle, HandThumbsUp, HandThumbsDown, HandThumbsDownFill, HandThumbsUpFill, Share, CaretUp, CaretDown, CaretUpFill, CaretDownFill, ThreeDotsVertical, X, ArrowRightShort, Plus, Dash, ChevronExpand, ChevronContract, ChevronDown, ChevronUp, Send } from 'react-bootstrap-icons';
 import { ButtonNeutral, ButtonNext } from 'react-ui-components-superflows';
 import { UploadToS3 } from 'react-upload-to-s3';
 import { Constants } from './Constants';
@@ -46,6 +46,21 @@ export const CommentView = (props) => {
         return JSON.parse(callbackInfo);
     }
 
+    function showAttachment(value) {
+
+        if(value) {
+            setFlowWrap(Constants.FLOW_SHOW_ATTACHMENT)
+        } else {
+            if(uploadResult == "") {
+                setFlowWrap(Constants.FLOW_INIT)
+            } else {
+                setFlowWrap(Constants.FLOW_UPLOAD_COMPLETE)
+            }
+            
+        }
+
+    }
+    
     function showEdit(value) {
 
         if(value) {
@@ -131,7 +146,23 @@ export const CommentView = (props) => {
             user: props.user,
             callbackInfo: props.callbackInfo == null ? null : props.callbackInfo
         });
-        setFlowWrap(Constants.FLOW_VIEW);
+        if(props.preventEditToView != null) {
+            if(props.preventEditToView) {
+
+            } else {
+                setFlowWrap(Constants.FLOW_VIEW);
+            }
+        } else {
+            setFlowWrap(Constants.FLOW_VIEW);
+        }
+        if(props.clearOnSubmit) {
+            setTextNew('');
+            setTextOriginal('');
+            setUploadResult('');
+            refInputNew.current.value = '';
+            setFlowWrap(Constants.FLOW_INIT)
+        }
+        
     }
 
     function onTextAreaKeyUp(event) {
@@ -299,10 +330,14 @@ export const CommentView = (props) => {
 
     function onReplyToClicked() {
         if(props.onReplyTo != null) {
-            props.onReplyTo(getCallbackInfoWrap());
+            props.onReplyTo({callbackInfo: getCallbackInfoWrap(), replyTo: props.replyTo});
         }
     }
 
+    function auto_grow(event) {
+        event.target.style.height = "5px";
+        event.target.style.height = (event.target.scrollHeight)+"px";
+    }
 
     useEffect(() => {
 
@@ -510,8 +545,8 @@ export const CommentView = (props) => {
                         <div className='me-2' style={{width: '40px', height: '40px', backgroundImage: `url(${props.user.picture})`, backgroundSize: 'cover', backgroundRepeat: 'no-repeat', backgroundPosition: 'center', borderRadius: '40px'}} ></div>
                         <div><b>{props.user.name}</b></div>
                         {(flow == Constants.FLOW_VIEW || flow == Constants.FLOW_CONFIRM_DELETE || flow == Constants.FLOW_CONFIRM_REMOVE_LIKE || flow == Constants.FLOW_CONFIRM_REMOVE_DISLIKE || flow == Constants.FLOW_CONFIRM_REMOVE_UPVOTE || flow == Constants.FLOW_CONFIRM_REMOVE_DOWNVOTE) && <Dot />}
-                        {((flow == Constants.FLOW_INIT || flow == Constants.FLOW_UPLOAD_COMPLETE) && props.showCancel != null && props.showCancel) && <Dot />}
-                        {((flow == Constants.FLOW_INIT || flow == Constants.FLOW_UPLOAD_COMPLETE) && props.showCancel != null && props.showCancel) && <Button className="button_cancel" onClick={() => {onCancelClicked()}} variant="btn btn-outline"><small>Cancel</small></Button>}
+                        {((flow == Constants.FLOW_INIT || flow == Constants.FLOW_UPLOAD_COMPLETE || flow == Constants.FLOW_SHOW_ATTACHMENT) && props.showCancel != null && props.showCancel) && <Dot />}
+                        {((flow == Constants.FLOW_INIT || flow == Constants.FLOW_UPLOAD_COMPLETE || flow == Constants.FLOW_SHOW_ATTACHMENT) && props.showCancel != null && props.showCancel) && <Button className="button_cancel" onClick={() => {onCancelClicked()}} variant="btn btn-outline"><small>Cancel</small></Button>}
                     </div>
                     {((flow == Constants.FLOW_VIEW || flow == Constants.FLOW_CONFIRM_DELETE || flow == Constants.FLOW_CONFIRM_REMOVE_LIKE || flow == Constants.FLOW_CONFIRM_REMOVE_DISLIKE || flow == Constants.FLOW_CONFIRM_REMOVE_UPVOTE || flow == Constants.FLOW_CONFIRM_REMOVE_DOWNVOTE) && ((props.showEdit != null && props.showEdit) || (props.showDelete != null && props.showDelete))) && <div className='button_show_edit d-flex me-2' ref={refPopup} onClick={() => {showEdit(true)}} style={{cursor: 'pointer'}}><ChevronDown /></div>}
                     {((flow == Constants.FLOW_SHOW_EDIT) && ((props.showEdit != null && props.showEdit) || (props.showDelete != null && props.showDelete))) && <div className='button_show_edit d-flex me-2' ref={refPopup} onClick={() => {showEdit(false)}} style={{cursor: 'pointer'}}><ChevronUp /></div>}
@@ -556,7 +591,7 @@ export const CommentView = (props) => {
                     </div>}
 
                     <Container className='d-flex flex-column flex-grow-1 p-0'>
-                        {props.replyTo != null && <div className='p-2 rounded-3' style={{backgroundColor: theme.commentViewReplyBackgroundColor, color: '#666666', borderLeftWidth: '5px', borderLeftColor: '#888888', borderLeftStyle: 'solid', cursor: 'pointer'}} onClick={() => {onReplyToClicked()}}>
+                        {(props.replyTo != null && props.replyTo.userName != null) && <div className='p-2 rounded-3' style={{backgroundColor: theme.commentViewReplyBackgroundColor, color: '#666666', borderLeftWidth: '5px', borderLeftColor: '#888888', borderLeftStyle: 'solid', cursor: 'pointer'}} onClick={() => {onReplyToClicked()}}>
                             <div>
                                 <b>
                                 {
@@ -650,10 +685,44 @@ export const CommentView = (props) => {
 
                 </Container>}
 
-                {(flow === Constants.FLOW_INIT || flow === Constants.FLOW_UPLOAD_COMPLETE || flow === Constants.FLOW_EMOJI_PICKER) && <Container className='d-flex flex-column flex-grow-1 p-0 my-1'>
-                    <textarea ref={refInputNew} className='rounded-3 flex-grow-1 border-0 mt-2 py-1 px-2'  style={{
-                height: windowDimensions.height > windowDimensions.width ? '150px' : '150px'
-            }} onChange={()=>{}} onKeyUp={(event) => {onTextAreaKeyUp(event)}}></textarea>
+                {(flow === Constants.FLOW_INIT || flow === Constants.FLOW_UPLOAD_COMPLETE || flow === Constants.FLOW_EMOJI_PICKER || flow == Constants.FLOW_SHOW_ATTACHMENT) && <Container className='d-flex flex-column flex-grow-1 p-0 my-1'>
+
+                    {(props.replyTo != null && props.replyTo.userName != null) && <div className='p-2 rounded-3 my-2' style={{backgroundColor: theme.commentViewReplyBackgroundColor, color: '#666666', borderLeftWidth: '5px', borderLeftColor: '#888888', borderLeftStyle: 'solid', cursor: 'pointer'}} onClick={() => {onReplyToClicked()}}>
+                            <div>
+                                <b>
+                                {
+                                    props.replyTo.userName
+                                }    
+                                </b>
+                            </div>
+                            <div>
+                                <small>
+                                {
+                                    props.replyTo.text.substring(0, 20)
+                                }    
+                                </small>
+                            </div>
+                    </div>}
+
+                    <div className='d-flex align-items-end'>
+                        {(flow === Constants.FLOW_INIT || flow === Constants.FLOW_UPLOAD_COMPLETE || flow === Constants.FLOW_SHOW_ATTACHMENT) && <Button className="btn_emoji" variant='btn-outline-secondary me-1' onClick={() => {openEmojiPicker(true)}} style={{color: props.theme != null ? props.theme.commentViewColor : theme.commentViewColor}}>
+                            <EmojiSmile/>
+                        </Button>}
+                        {(flow === Constants.FLOW_EMOJI_PICKER) && <Button className="btn_emoji" variant='btn-outline-secondary me-1' onClick={() => {openEmojiPicker(false)}} style={{color: props.theme != null ? props.theme.commentViewColor : theme.commentViewColor}}>
+                            <Keyboard/>
+                        </Button>}
+                        <textarea ref={refInputNew} className='rounded-3 flex-grow-1 border-0 mt-2 py-1 px-2 me-1'  style={{resize: 'none', overflow: 'hidden', height: '35px', minHeight: '35px'}} onChange={()=>{}} onKeyUp={(event) => {onTextAreaKeyUp(event)}} onInput={(event) => {auto_grow(event)}}></textarea>
+                        {(flow === Constants.FLOW_INIT  || flow === Constants.FLOW_EMOJI_PICKER ) && <Button className="btn_emoji" variant='btn-outline-secondary me-1' onClick={() => {showAttachment(true)}} style={{color: props.theme != null ? props.theme.commentViewColor : theme.commentViewColor}}>
+                            <Paperclip/>
+                        </Button>}
+                        {(flow === Constants.FLOW_SHOW_ATTACHMENT) && <Button className="btn_emoji" variant='btn-outline-secondary mx-1' onClick={() => {showAttachment(false)}} style={{color: props.theme != null ? props.theme.commentViewColor : theme.commentViewColor}}>
+                            <ChevronUp/>
+                        </Button>}
+                        <Button className="btn_emoji" variant='btn btn-secondary' onClick={() => {submitResult()}} disabled={disableSubmit} style={{backgroundColor: theme.uploadToS3UploadBackgroundColor, color: theme.uploadToS3UploadColor}}>
+                            <Send/>
+                        </Button>
+                    </div>
+                    
                 </Container>}
 
                 {flow === Constants.FLOW_UPLOAD_COMPLETE && <Container className='d-flex flex-row justify-content-start align-items-center ps-0 pe-0 pt-2'>
@@ -672,25 +741,24 @@ export const CommentView = (props) => {
                 </Container>}
 
                 {flow === Constants.FLOW_EMOJI_PICKER && <Container className='d-flex flex-row justify-content-start align-items-start ps-0 pe-0 pt-2'>
-                    <Button className='cancel-emoji' variant='btn-outline-secondary me-2' onClick={() => {openEmojiPicker(false)}} style={{color: props.theme != null ? props.theme.commentViewColor : theme.commentViewColor}}><Keyboard/></Button>
                     <Picker onEmojiClick={(event, obj) => {onEmojiChosen(event, obj)}}  pickerStyle={{ width: '100%' }}/>
                 </Container>}
 
-                {(flow === Constants.FLOW_INIT || flow === Constants.FLOW_UPLOAD_COMPLETE || flow === Constants.FLOW_EMOJI_PICKER) && <Container className='d-flex flex-row justify-content-end align-items-center ps-0 pe-0 pt-2 pb-2'>
-                    {(flow === Constants.FLOW_INIT || flow === Constants.FLOW_UPLOAD_COMPLETE) && <Button className="btn_emoji" variant='btn-outline-secondary me-2' onClick={() => {openEmojiPicker(true)}} style={{color: props.theme != null ? props.theme.commentViewColor : theme.commentViewColor}}>
+                {(flow == Constants.FLOW_SHOW_ATTACHMENT) && <Container className='d-flex flex-row justify-content-center align-items-center ps-0 pe-0 pt-2 pb-2'>
+                    {/* {(flow === Constants.FLOW_INIT || flow === Constants.FLOW_UPLOAD_COMPLETE) && <Button className="btn_emoji" variant='btn-outline-secondary me-2' onClick={() => {openEmojiPicker(true)}} style={{color: props.theme != null ? props.theme.commentViewColor : theme.commentViewColor}}>
                         <EmojiSmile/>
-                    </Button>}
-                    <div className='flex-grow-1'  style={{visibility: 'hidden'}}/>
-                    {(flow === Constants.FLOW_INIT) && <Button className="btn-video" variant='btn-outline-secondary me-2' onClick={() => {prepareUpload(Constants.UPLOAD_TYPE_VIDEO)}} style={{color: props.theme != null ? props.theme.commentViewColor : theme.commentViewColor}}>
+                    </Button>} */}
+                    <div style={{visibility: 'hidden'}}/>
+                    {<Button className="btn-video" variant='btn-outline-secondary mx-2' onClick={() => {prepareUpload(Constants.UPLOAD_TYPE_VIDEO)}} style={{color: props.theme != null ? props.theme.commentViewColor : theme.commentViewColor}}>
                         <PlayBtn/>
                     </Button>}
-                    {(flow === Constants.FLOW_INIT) && <Button className="btn-pdf" variant='btn-outline-secondary me-2' onClick={() => {prepareUpload(Constants.UPLOAD_TYPE_PDF)}} style={{color: props.theme != null ? props.theme.commentViewColor : theme.commentViewColor}}>
+                    {<Button className="btn-pdf" variant='btn-outline-secondary mx-2' onClick={() => {prepareUpload(Constants.UPLOAD_TYPE_PDF)}} style={{color: props.theme != null ? props.theme.commentViewColor : theme.commentViewColor}}>
                         <Paperclip/>
                     </Button>}
-                    {(flow === Constants.FLOW_INIT) && <Button className="btn-image" variant='btn-outline-secondary me-4' onClick={() => {prepareUpload(Constants.UPLOAD_TYPE_IMAGE)}} style={{color: props.theme != null ? props.theme.commentViewColor : theme.commentViewColor}}>
+                    {<Button className="btn-image" variant='btn-outline-secondary mx-2' onClick={() => {prepareUpload(Constants.UPLOAD_TYPE_IMAGE)}} style={{color: props.theme != null ? props.theme.commentViewColor : theme.commentViewColor}}>
                         <CardImage />
                     </Button>}
-                    {(flow === Constants.FLOW_INIT || flow === Constants.FLOW_UPLOAD_COMPLETE) && <ButtonNeutral caption="Submit"  custom={{backgroundColor: props.theme != null ? props.theme.commentViewSubmitButtonBackgroundColor : theme.commentViewSubmitButtonBackgroundColor, color: props.theme != null ? props.theme.commentViewSubmitButtonColor : theme.commentViewSubmitButtonColor}} onClick={() => {submitResult()}} disabled={disableSubmit} icon="ArrowRight"/>}
+                    {/* {(flow === Constants.FLOW_INIT || flow === Constants.FLOW_UPLOAD_COMPLETE) && <ButtonNeutral caption="Submit"  custom={{backgroundColor: props.theme != null ? props.theme.commentViewSubmitButtonBackgroundColor : theme.commentViewSubmitButtonBackgroundColor, color: props.theme != null ? props.theme.commentViewSubmitButtonColor : theme.commentViewSubmitButtonColor}} onClick={() => {submitResult()}} disabled={disableSubmit} icon="ArrowRight"/>} */}
                 </Container>}
 
                 {flow === Constants.FLOW_UPLOAD && <Container className='d-flex flex-row justify-content-end align-items-center ps-0 pe-0 pt-2 pb-2'>
