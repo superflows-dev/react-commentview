@@ -14,8 +14,11 @@ export const CommentView = (props) => {
     const [windowDimensions, setWindowDimensions] = useState(Util.getWindowDimensions());
     const [uploadType, setUploadType] = useState(Constants.UPLOAD_TYPE_IMAGE);
     const [uploadResult, setUploadResult] = useState('');
+    const [dirty, setDirty] = useState(false);
+    const [mode, setMode] = useState(Constants.MODE_VIEW);
     const [flow, setFlow] = useState(Constants.FLOW_VIEW);
     const [edited, setEdited] = useState(false);
+    const [preFill, setPreFill] = useState('{}');
     const [textNew, setTextNew] = useState('');
     const [textOriginal, setTextOriginal] = useState('');
     const [disableSubmit, setDisableSubmit] = useState(true);
@@ -33,10 +36,17 @@ export const CommentView = (props) => {
     const [iHaveUpVoted, setIHaveUpVoted] = useState(false);
     const [iHaveDownVoted, setIHaveDownVoted] = useState(false);
     const [callbackInfo, setCallbackInfo] = useState(false);
-
     const refInputNew = useRef(null);
     const refPopup = useRef(null);
     const theme = Themes.getTheme("Default");
+
+    function setPreFillWrap(value) {
+        setPreFill(JSON.stringify(value))
+    }
+
+    function getPreFillWrap() {
+        return JSON.parse(preFill);
+    }
 
     function setCallbackInfoWrap(value) {
         setCallbackInfo(JSON.stringify(value));
@@ -62,7 +72,6 @@ export const CommentView = (props) => {
     }
     
     function showEdit(value) {
-
         if(value) {
             setFlowWrap(Constants.FLOW_SHOW_EDIT)
         } else {
@@ -81,10 +90,13 @@ export const CommentView = (props) => {
     }
 
     function cancelUpload() {
+
         setFlowWrap(Constants.FLOW_INIT);
+        
     }
 
     function onUploadComplete(result) {
+        setDirty(true);
         setFlowWrap(Constants.FLOW_UPLOAD_COMPLETE, 1500);
         if(uploadType == Constants.UPLOAD_TYPE_PDF || uploadType == Constants.UPLOAD_TYPE_IMAGE || uploadType == Constants.UPLOAD_TYPE_VIDEO) {
             setUploadResult(result.url)
@@ -172,6 +184,7 @@ export const CommentView = (props) => {
             submitResult();
         } else {
             setTextNew(refInputNew.current.value);
+            setDirty(true);
             validateSubmit();
         }
     }
@@ -206,12 +219,13 @@ export const CommentView = (props) => {
 
     function onCancelClicked() {
         setTextNew(textOriginal);
-        setFlowWrap(Constants.FLOW_VIEW);
+        //setFlowWrap(Constants.FLOW_VIEW);
+        setMode(Constants.MODE_VIEW)
     }
 
     function onDeleteClicked() {
 
-        if(flow === Constants.FLOW_VIEW) {
+        if(flow === Constants.FLOW_SHOW_EDIT) {
             setFlowWrap(Constants.FLOW_CONFIRM_DELETE)
         } else {
             if(props.onDelete != null) {
@@ -344,151 +358,139 @@ export const CommentView = (props) => {
         validateSubmit();
 
     }, [uploadResult])
-    
-    useEffect(() => {
-
-        if(flow === Constants.FLOW_INIT || flow === Constants.FLOW_UPLOAD_COMPLETE) {
-            refInputNew.current.focus();
-            refInputNew.current.value = textNew;
-        }
-
-        if(flow === Constants.FLOW_CONFIRM_DELETE) {
-
-            setDeleteTimeoutHandler(setTimeout(() => {
-                if(flow === Constants.FLOW_CONFIRM_DELETE) {
-                    setFlowWrap(Constants.FLOW_VIEW)
-                }
-            }, 5000));
-
-        }
-
-        if(flow === Constants.FLOW_DELETED) {
-            clearTimeout(deleteTimeoutHandler);
-        }
-
-        if(flow === Constants.FLOW_CONFIRM_REMOVE_LIKE) {
-
-            setRemoveLikeTimeoutHandler(setTimeout(() => {
-                if(flow === Constants.FLOW_CONFIRM_REMOVE_LIKE) {
-                    setFlowWrap(Constants.FLOW_VIEW)
-                }
-            }, 5000));
-
-        }
-
-        if(flow === Constants.FLOW_VIEW) {
-            clearTimeout(removeLikeTimeoutHandler);
-        }
-
-        if(flow === Constants.FLOW_CONFIRM_REMOVE_DISLIKE) {
-
-            setRemoveDisLikeTimeoutHandler(setTimeout(() => {
-                if(flow === Constants.FLOW_CONFIRM_REMOVE_DISLIKE) {
-                    setFlowWrap(Constants.FLOW_VIEW)
-                }
-            }, 5000));
-
-        }
-
-        if(flow === Constants.FLOW_VIEW) {
-            clearTimeout(removeDisLikeTimeoutHandler);
-        }
-
-        if(flow === Constants.FLOW_CONFIRM_REMOVE_UPVOTE) {
-
-            setRemoveUpVoteTimeoutHandler(setTimeout(() => {
-                if(flow === Constants.FLOW_CONFIRM_REMOVE_UPVOTE) {
-                    setFlowWrap(Constants.FLOW_VIEW)
-                }
-            }, 5000));
-
-        }
-
-        if(flow === Constants.FLOW_VIEW) {
-            clearTimeout(removeUpVoteTimeoutHandler);
-        }
-
-        if(flow === Constants.FLOW_CONFIRM_REMOVE_DOWNVOTE) {
-
-            setRemoveDownVoteTimeoutHandler(setTimeout(() => {
-                if(flow === Constants.FLOW_CONFIRM_REMOVE_DOWNVOTE) {
-                    setFlowWrap(Constants.FLOW_VIEW)
-                }
-            }, 5000));
-
-        }
-
-        if(flow === Constants.FLOW_VIEW) {
-            clearTimeout(removeDownVoteTimeoutHandler);
-        }
-
-    }, [flow])
 
     useEffect(() => {
 
-        if(props.mode === Constants.MODE_EDIT) {
-            if(props.preFill != null) {
-                
-                setTextNew(props.preFill.text);
+        if(!dirty) {
+            if(getPreFillWrap() != null) {
+
+                if(getPreFillWrap().text != null) {
+                    setTextNew(getPreFillWrap().text);
+                    setTextOriginal(getPreFillWrap().text);
+                }
                 if(refInputNew.current != null) {
-                    refInputNew.current.value = props.preFill.text;
+                    if(getPreFillWrap().text != null && refInputNew.current != null) {
+                        refInputNew.current.value = getPreFillWrap().text;
+                    }
                 }
+                if(getPreFillWrap().attachment != null) {
+                    setUploadResult(getPreFillWrap().attachment.object);
+                    setUploadType(getPreFillWrap().attachment.type);
+                } else {
+                    setUploadResult('');
+                }
+            }
+        }
+
+        if(mode === Constants.MODE_VIEW) {
+
+            if(flow === Constants.FLOW_SHOW_EDIT) {
+
+                setFlowWrap(Constants.FLOW_SHOW_EDIT);
+
+            } else if(flow === Constants.FLOW_CONFIRM_DELETE) {
+                
+                setDeleteTimeoutHandler(setTimeout(() => {
+                    if(flow === Constants.FLOW_CONFIRM_DELETE) {
+                        setFlowWrap(Constants.FLOW_VIEW)
+                    }
+                }, 5000));
     
-                if(props.preFill.attachment != null) {
-                    setUploadResult(props.preFill.attachment.object);
-                    setUploadType(props.preFill.attachment.type);
-                    setFlowWrap(Constants.FLOW_UPLOAD_COMPLETE);
+            } else if(flow === Constants.FLOW_CONFIRM_REMOVE_LIKE) {
+                
+                setRemoveLikeTimeoutHandler(setTimeout(() => {
+                    if(flow === Constants.FLOW_CONFIRM_REMOVE_LIKE) {
+                        setFlowWrap(Constants.FLOW_VIEW)
+                    }
+                }, 5000));
+    
+            } else if(flow === Constants.FLOW_CONFIRM_REMOVE_DISLIKE) {
+                
+                setRemoveDisLikeTimeoutHandler(setTimeout(() => {
+                    if(flow === Constants.FLOW_CONFIRM_REMOVE_DISLIKE) {
+                        setFlowWrap(Constants.FLOW_VIEW)
+                    }
+                }, 5000));
+    
+            } else if(flow === Constants.FLOW_CONFIRM_REMOVE_UPVOTE) {
+                
+                setRemoveUpVoteTimeoutHandler(setTimeout(() => {
+                    if(flow === Constants.FLOW_CONFIRM_REMOVE_UPVOTE) {
+                        setFlowWrap(Constants.FLOW_VIEW)
+                    }
+                }, 5000));
+    
+            } else if(flow === Constants.FLOW_CONFIRM_REMOVE_DOWNVOTE) {
+                
+                setRemoveDownVoteTimeoutHandler(setTimeout(() => {
+                    if(flow === Constants.FLOW_CONFIRM_REMOVE_DOWNVOTE) {
+                        setFlowWrap(Constants.FLOW_VIEW)
+                    }
+                }, 5000));
+    
+            } else if(flow === Constants.FLOW_VIEW) {
+
+                clearTimeout(deleteTimeoutHandler);
+                clearTimeout(removeLikeTimeoutHandler);
+                clearTimeout(removeDisLikeTimeoutHandler);
+                clearTimeout(removeUpVoteTimeoutHandler);
+                clearTimeout(removeDownVoteTimeoutHandler);
+
+            } else if(flow === Constants.FLOW_INIT) {
+                
+                if(refInputNew.current != null) {
+                    refInputNew.current.focus();
+                    refInputNew.current.value = textNew;
                 }
 
-            }    
-        } else if(props.mode === Constants.MODE_VIEW){
+            } else if(flow === Constants.FLOW_UPLOAD_COMPLETE) {
+                
+                if(refInputNew.current != null) {
+                    refInputNew.current.focus();
+                    refInputNew.current.value = textNew;
+                }
+                
+            }
+    
 
-            if(props.preFill != null) {
-                setTextNew(props.preFill.text);
+        }
+
+        if(mode === Constants.MODE_EDIT) {
+            if(refInputNew.current != null) {
+                refInputNew.current.focus();
+                refInputNew.current.value = textNew;
             }
-            if(props.preFill != null && props.preFill.attachment != null) {
-                setUploadResult(props.preFill.attachment.object);
-                setUploadType(props.preFill.attachment.type);
+            if(uploadResult != '') {
+                setFlowWrap(Constants.FLOW_UPLOAD_COMPLETE);
             }
+        }
+
+        if(mode === Constants.MODE_DELETED) {
+            
+            
+            if(flow === Constants.FLOW_DELETED) {
+                clearTimeout(deleteTimeoutHandler);
+            }
+        }
+
+    }, [preFill, flow, refInputNew.current])
+
+    useEffect(() => {
+
+        if(mode == Constants.MODE_EDIT) {
+            setFlowWrap(Constants.FLOW_INIT);
+        }
+
+        if(mode == Constants.MODE_VIEW) {
             setFlowWrap(Constants.FLOW_VIEW);
+        }
 
-        } else {
+        if(mode == Constants.MODE_DELETED) {
             setFlowWrap(Constants.FLOW_DELETED);
         }
 
-        
-
-    }, [props.mode])
-
-    useEffect(() => {
-
-        if(props.mode == Constants.MODE_EDIT) {
-            if(props.attachment == null) {
-                setFlowWrap(Constants.FLOW_INIT)
-            } else {
-                setFlowWrap(Constants.FLOW_UPLOAD_COMPLETE)
-            }
-            
-        }
-
-        if(props.mode == Constants.MODE_VIEW) {
-            setFlowWrap(Constants.FLOW_VIEW)
-        }
-
-        if(props.mode == Constants.MODE_DELETED) {
-            setFlowWrap(Constants.FLOW_DELETED)
-        }
-
-    }, [props.mode])
-
-    useEffect(() => {
-
-        if(props.preFill != null) {
-            setTextOriginal(props.preFill.text);
-        }
-
-    }, [props.preFill?.text])
-
+    }, [mode])
+    
     useEffect(() => {
         setLikes(props.likes)
     }, [props.likes])
@@ -528,6 +530,18 @@ export const CommentView = (props) => {
     useEffect(() => {
         setEdited(props.edited);
     }, [props.edited])
+
+    useEffect(() => {
+        setMode(props.mode);
+    }, [props.mode])
+
+    useEffect(() => {
+        if(props.preFill != null) {
+            setPreFillWrap(props.preFill);
+        }
+
+    }, [props.preFill?.text])
+
     return (
 
         <div style={{position: 'relative'}}>
@@ -553,7 +567,7 @@ export const CommentView = (props) => {
 
                 </div>
 
-                {flow == Constants.FLOW_SHOW_EDIT && <div className='d-flex justify-content-between'>
+                {(flow == Constants.FLOW_SHOW_EDIT || flow == Constants.FLOW_CONFIRM_DELETE) && <div className='d-flex justify-content-between'>
                     <div></div>
                     <div>
                         {(props.showEdit != null && props.showEdit) && <Button className="button_edit text-muted" onClick={() => {onEditClicked()}} variant="btn btn-outline"><small><small>Edit</small></small></Button>}
@@ -564,7 +578,7 @@ export const CommentView = (props) => {
 
                 {flow == Constants.FLOW_DELETED && <Container className='d-flex flex-column flex-grow-1 p-0'>
 
-                    <div className='py-2' style={{color: '#777777'}}>
+                    <div className='slash_circle py-2' style={{color: '#777777'}}>
                         <SlashCircle className='me-2' />
                         {
                             Constants.CONTENT_DELETED
@@ -634,7 +648,7 @@ export const CommentView = (props) => {
                             {props.showShare && <Button className="button_reply ps-0 pe-0 py-0 ms-2 me-2" onClick={() => {onShareClicked()}} variant="btn btn-outline"><small>Share</small></Button>}
                         
                         </div>}
-                        {(props.showLikes || props.showDisLikes) && <div className='d-flex justify-content-start align-items-center text-muted mt-2'>
+                        {(props.showLikes || props.showDisLikes || props.user.timestamp != null) && <div className='d-flex justify-content-start align-items-center text-muted mt-2'>
                             
                             <div className='d-flex w-100 justify-content-end align-items-center'>
                                 
@@ -708,17 +722,17 @@ export const CommentView = (props) => {
                         {(flow === Constants.FLOW_INIT || flow === Constants.FLOW_UPLOAD_COMPLETE || flow === Constants.FLOW_SHOW_ATTACHMENT) && <Button className="btn_emoji" variant='btn-outline-secondary me-1' onClick={() => {openEmojiPicker(true)}} style={{color: props.theme != null ? props.theme.commentViewColor : theme.commentViewColor}}>
                             <EmojiSmile/>
                         </Button>}
-                        {(flow === Constants.FLOW_EMOJI_PICKER) && <Button className="btn_emoji" variant='btn-outline-secondary me-1' onClick={() => {openEmojiPicker(false)}} style={{color: props.theme != null ? props.theme.commentViewColor : theme.commentViewColor}}>
+                        {(flow === Constants.FLOW_EMOJI_PICKER) && <Button className="btn_cancel_emoji" variant='btn-outline-secondary me-1' onClick={() => {openEmojiPicker(false)}} style={{color: props.theme != null ? props.theme.commentViewColor : theme.commentViewColor}}>
                             <Keyboard/>
                         </Button>}
-                        <textarea ref={refInputNew} className='rounded-3 flex-grow-1 border-0 mt-2 py-1 px-2 me-1'  style={{resize: 'none', overflow: 'hidden', height: '35px', minHeight: '35px'}} onChange={()=>{}} onKeyUp={(event) => {onTextAreaKeyUp(event)}} onInput={(event) => {auto_grow(event)}}></textarea>
-                        {(flow === Constants.FLOW_INIT  || flow === Constants.FLOW_EMOJI_PICKER ) && <Button className="btn_emoji" variant='btn-outline-secondary me-1' onClick={() => {showAttachment(true)}} style={{color: props.theme != null ? props.theme.commentViewColor : theme.commentViewColor}}>
+                        <textarea ref={refInputNew} className='text_input rounded-3 flex-grow-1 border-0 mt-2 py-1 px-2 me-1'  style={{resize: 'none', overflow: 'hidden', height: '35px', minHeight: '35px'}} onChange={()=>{}} onKeyUp={(event) => {onTextAreaKeyUp(event)}} onInput={(event) => {auto_grow(event)}}></textarea>
+                        {(flow === Constants.FLOW_INIT  || flow === Constants.FLOW_EMOJI_PICKER ) && <Button className="btn_paperclip" variant='btn-outline-secondary me-1' onClick={() => {showAttachment(true)}} style={{color: props.theme != null ? props.theme.commentViewColor : theme.commentViewColor}}>
                             <Paperclip/>
                         </Button>}
-                        {(flow === Constants.FLOW_SHOW_ATTACHMENT) && <Button className="btn_emoji" variant='btn-outline-secondary mx-1' onClick={() => {showAttachment(false)}} style={{color: props.theme != null ? props.theme.commentViewColor : theme.commentViewColor}}>
+                        {(flow === Constants.FLOW_SHOW_ATTACHMENT) && <Button className="btn_cancel_paperclip" variant='btn-outline-secondary mx-1' onClick={() => {showAttachment(false)}} style={{color: props.theme != null ? props.theme.commentViewColor : theme.commentViewColor}}>
                             <ChevronUp/>
                         </Button>}
-                        <Button className="btn_emoji" variant='btn btn-secondary' onClick={() => {submitResult()}} disabled={disableSubmit} style={{backgroundColor: theme.uploadToS3UploadBackgroundColor, color: theme.uploadToS3UploadColor}}>
+                        <Button className="btn_send" variant='btn btn-secondary' onClick={() => {submitResult()}} disabled={disableSubmit} style={{backgroundColor: theme.uploadToS3UploadBackgroundColor, color: theme.uploadToS3UploadColor}}>
                             <Send/>
                         </Button>
                     </div>
