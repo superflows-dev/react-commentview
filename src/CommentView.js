@@ -15,6 +15,9 @@ export const CommentView = (props) => {
     const [uploadType, setUploadType] = useState(Constants.UPLOAD_TYPE_IMAGE);
     const [uploadResult, setUploadResult] = useState('');
     const [dirty, setDirty] = useState(false);
+    const [showEmoji, setShowEmoji] = useState(false);
+    const [showAttachments, setShowAttachments] = useState(false);
+    const [showUpload, setShowUpload] = useState(false);
     const [mode, setMode] = useState(Constants.MODE_VIEW);
     const [flow, setFlow] = useState(Constants.FLOW_VIEW);
     const [edited, setEdited] = useState(false);
@@ -58,16 +61,7 @@ export const CommentView = (props) => {
 
     function showAttachment(value) {
 
-        if(value) {
-            setFlowWrap(Constants.FLOW_SHOW_ATTACHMENT)
-        } else {
-            if(uploadResult == "") {
-                setFlowWrap(Constants.FLOW_INIT)
-            } else {
-                setFlowWrap(Constants.FLOW_UPLOAD_COMPLETE)
-            }
-            
-        }
+        setShowAttachments(value)
 
     }
     
@@ -85,13 +79,14 @@ export const CommentView = (props) => {
     }
 
     function prepareUpload(type) {
-        setFlowWrap(Constants.FLOW_UPLOAD);
+
         setUploadType(type);
+        setTimeout(() => {setShowUpload(true)}, 500);
     }
 
     function cancelUpload() {
 
-        setFlowWrap(Constants.FLOW_INIT);
+        setShowUpload(false);
         
     }
 
@@ -105,6 +100,7 @@ export const CommentView = (props) => {
 
     function onRemoveUpload() {
         setUploadResult('');
+        setDirty(true)
         setFlowWrap(Constants.FLOW_INIT);
     }
 
@@ -195,25 +191,18 @@ export const CommentView = (props) => {
     }
 
     function openEmojiPicker(value) {
-        if(value) {
-            setFlowWrap(Constants.FLOW_EMOJI_PICKER);
-        } else {
-            if(uploadResult != '') {
-                setFlowWrap(Constants.FLOW_UPLOAD_COMPLETE)
-            } else {
-                setFlowWrap(Constants.FLOW_INIT)
-            }
-            refInputNew.current.focus();
-        }
+
+        setShowEmoji(value)
 
     }
 
     function onEditClicked() {
-        if(uploadResult != null && uploadResult.length > 0) {
-            setFlowWrap(Constants.FLOW_UPLOAD_COMPLETE);
-        } else {
-            setFlowWrap(Constants.FLOW_INIT);
-        }
+        // if(uploadResult != null && uploadResult.length > 0) {
+        //     setFlowWrap(Constants.FLOW_UPLOAD_COMPLETE);
+        // } else {
+        //     setFlowWrap(Constants.FLOW_INIT);
+        // }
+        setMode(Constants.MODE_EDIT);
 
     }
 
@@ -460,9 +449,24 @@ export const CommentView = (props) => {
                 refInputNew.current.focus();
                 refInputNew.current.value = textNew;
             }
-            if(uploadResult != '') {
-                setFlowWrap(Constants.FLOW_UPLOAD_COMPLETE);
+
+            if(showUpload) {
+                setFlowWrap(Constants.FLOW_UPLOAD)
+            } else if(showEmoji) {
+                setFlowWrap(Constants.FLOW_EMOJI_PICKER);
+            } else if(showAttachments) {
+                setFlowWrap(Constants.FLOW_SHOW_ATTACHMENT)
+            } else {
+                if(uploadResult != '') {
+                    setFlowWrap(Constants.FLOW_UPLOAD_COMPLETE)
+                } else {
+                    setFlowWrap(Constants.FLOW_INIT)
+                }
             }
+        
+            // if(uploadResult != '') {
+            //     setFlowWrap(Constants.FLOW_UPLOAD_COMPLETE);
+            // }
         }
 
         if(mode === Constants.MODE_DELETED) {
@@ -473,10 +477,10 @@ export const CommentView = (props) => {
             }
         }
 
-    }, [preFill, flow, refInputNew.current])
+    }, [preFill, flow, refInputNew.current, showEmoji, showAttachments, showUpload])
 
     useEffect(() => {
-
+      
         if(mode == Constants.MODE_EDIT) {
             setFlowWrap(Constants.FLOW_INIT);
         }
@@ -557,28 +561,30 @@ export const CommentView = (props) => {
 
                     <div className='d-flex align-items-center'>
                         <div className='me-2' style={{width: '40px', height: '40px', backgroundImage: `url(${props.user.picture})`, backgroundSize: 'cover', backgroundRepeat: 'no-repeat', backgroundPosition: 'center', borderRadius: '40px'}} ></div>
-                        <div><b>{props.user.name}</b></div>
-                        {(flow == Constants.FLOW_VIEW || flow == Constants.FLOW_CONFIRM_DELETE || flow == Constants.FLOW_CONFIRM_REMOVE_LIKE || flow == Constants.FLOW_CONFIRM_REMOVE_DISLIKE || flow == Constants.FLOW_CONFIRM_REMOVE_UPVOTE || flow == Constants.FLOW_CONFIRM_REMOVE_DOWNVOTE) && <Dot />}
-                        {((flow == Constants.FLOW_INIT || flow == Constants.FLOW_UPLOAD_COMPLETE || flow == Constants.FLOW_SHOW_ATTACHMENT) && props.showCancel != null && props.showCancel) && <Dot />}
-                        {((flow == Constants.FLOW_INIT || flow == Constants.FLOW_UPLOAD_COMPLETE || flow == Constants.FLOW_SHOW_ATTACHMENT) && props.showCancel != null && props.showCancel) && <Button className="button_cancel" onClick={() => {onCancelClicked()}} variant="btn btn-outline"><small>Cancel</small></Button>}
+                        <div style={{
+                            color: props.theme != null ? props.theme.commentViewUserColor : theme.commentViewUserColor,
+                        }}><b>{props.user.name}</b></div>
+                        {(flow == Constants.FLOW_VIEW || flow == Constants.FLOW_CONFIRM_DELETE || flow == Constants.FLOW_CONFIRM_REMOVE_LIKE || flow == Constants.FLOW_CONFIRM_REMOVE_DISLIKE || flow == Constants.FLOW_CONFIRM_REMOVE_UPVOTE || flow == Constants.FLOW_CONFIRM_REMOVE_DOWNVOTE) && <div style={{color: props.theme != null ? props.theme.commentViewUserColor : theme.commentViewUserColor}}><Dot /></div>}
+                        {((flow == Constants.FLOW_INIT || flow == Constants.FLOW_UPLOAD_COMPLETE || flow == Constants.FLOW_SHOW_ATTACHMENT) && props.showCancel != null && props.showCancel) && <div style={{color: props.theme != null ? props.theme.commentViewUserColor : theme.commentViewUserColor}}><Dot /></div>}
+                        {((flow == Constants.FLOW_INIT || flow == Constants.FLOW_UPLOAD_COMPLETE || flow == Constants.FLOW_SHOW_ATTACHMENT) && props.showCancel != null && props.showCancel) && <Button style={{color: props.theme != null ? props.theme.commentViewDecorationColor : theme.commentViewDecorationColor}} className="button_cancel" onClick={() => {onCancelClicked()}} variant="btn btn-outline"><small>Cancel</small></Button>}
                     </div>
-                    {((flow == Constants.FLOW_VIEW || flow == Constants.FLOW_CONFIRM_DELETE || flow == Constants.FLOW_CONFIRM_REMOVE_LIKE || flow == Constants.FLOW_CONFIRM_REMOVE_DISLIKE || flow == Constants.FLOW_CONFIRM_REMOVE_UPVOTE || flow == Constants.FLOW_CONFIRM_REMOVE_DOWNVOTE) && ((props.showEdit != null && props.showEdit) || (props.showDelete != null && props.showDelete))) && <div className='button_show_edit d-flex me-2' ref={refPopup} onClick={() => {showEdit(true)}} style={{cursor: 'pointer'}}><ChevronDown /></div>}
-                    {((flow == Constants.FLOW_SHOW_EDIT) && ((props.showEdit != null && props.showEdit) || (props.showDelete != null && props.showDelete))) && <div className='button_show_edit d-flex me-2' ref={refPopup} onClick={() => {showEdit(false)}} style={{cursor: 'pointer'}}><ChevronUp /></div>}
+                    {((flow == Constants.FLOW_VIEW || flow == Constants.FLOW_CONFIRM_DELETE || flow == Constants.FLOW_CONFIRM_REMOVE_LIKE || flow == Constants.FLOW_CONFIRM_REMOVE_DISLIKE || flow == Constants.FLOW_CONFIRM_REMOVE_UPVOTE || flow == Constants.FLOW_CONFIRM_REMOVE_DOWNVOTE) && ((props.showEdit != null && props.showEdit) || (props.showDelete != null && props.showDelete))) && <div className='button_show_edit d-flex me-2' ref={refPopup} onClick={() => {showEdit(true)}} style={{cursor: 'pointer', color: props.theme != null ? props.theme.commentViewDecorationColor : theme.commentViewDecorationColor}}><ChevronDown /></div>}
+                    {((flow == Constants.FLOW_SHOW_EDIT) && ((props.showEdit != null && props.showEdit) || (props.showDelete != null && props.showDelete))) && <div className='button_show_edit d-flex me-2' ref={refPopup} onClick={() => {showEdit(false)}} style={{cursor: 'pointer', color: props.theme != null ? props.theme.commentViewDecorationColor : theme.commentViewDecorationColor}}><ChevronUp /></div>}
 
                 </div>
 
                 {(flow == Constants.FLOW_SHOW_EDIT || flow == Constants.FLOW_CONFIRM_DELETE) && <div className='d-flex justify-content-between'>
                     <div></div>
                     <div>
-                        {(props.showEdit != null && props.showEdit) && <Button className="button_edit text-muted" onClick={() => {onEditClicked()}} variant="btn btn-outline"><small><small>Edit</small></small></Button>}
-                        {(props.showDelete != null && props.showDelete) && <Button className="button_delete  text-muted" onClick={() => {onDeleteClicked()}} variant="btn btn-outline"><small><small>Delete</small></small></Button>}
+                        {(props.showEdit != null && props.showEdit) && <Button className="button_edit" onClick={() => {onEditClicked()}} variant="btn btn-outline" style={{color: props.theme != null ? props.theme.commentViewDecorationColor : theme.commentViewDecorationColor}}><small><small>Edit</small></small></Button>}
+                        {(props.showDelete != null && props.showDelete) && <Button className="button_delete " onClick={() => {onDeleteClicked()}} variant="btn btn-outline" style={{color: props.theme != null ? props.theme.commentViewDecorationColor: theme.commentViewDecorationColor}}><small><small>Delete</small></small></Button>}
                     </div>
                 </div>}
 
 
                 {flow == Constants.FLOW_DELETED && <Container className='d-flex flex-column flex-grow-1 p-0'>
 
-                    <div className='slash_circle py-2' style={{color: '#777777'}}>
+                    <div className='slash_circle py-2' style={{color: props.theme != null ? props.theme.commentViewColor : theme.commentViewColor}}>
                         <SlashCircle className='me-2' />
                         {
                             Constants.CONTENT_DELETED
@@ -591,21 +597,27 @@ export const CommentView = (props) => {
 
                     {props.showVotes && <div className='d-flex flex-column justify-content-start align-items-center py-2' style={{width: '45px',marginRight: '7px'}}>
                         <small>
-                            {iHaveUpVoted && <CaretUpFill className="button_upvoted" onClick={()=>{onUpVoteRemoved()}} style={{cursor: 'pointer'}}/>}
-                            {!iHaveUpVoted && <CaretUp className="button_upvote text-muted" onClick={()=>{onUpVoted()}} style={{cursor: 'pointer'}}/>}
+                            {iHaveUpVoted && <CaretUpFill className="button_upvoted" onClick={()=>{onUpVoteRemoved()}} style={{cursor: 'pointer', color: props.theme != null ? props.theme.commentViewDecorationHighlightColor : theme.commentViewDecorationHighlightColor}}/>}
+                            {!iHaveUpVoted && <CaretUp className="button_upvote" onClick={()=>{onUpVoted()}} style={{cursor: 'pointer', color: props.theme != null ? props.theme.commentViewDecorationColor : theme.commentViewDecorationColor}}/>}
                         </small>
                         <small>
-                            {(iHaveUpVoted || iHaveDownVoted) && <span style={{color: "black"}}>{upVotes - downVotes}</span>}
-                            {(!iHaveUpVoted && !iHaveDownVoted) && <span className='text-muted'>{upVotes - downVotes}</span>}
+                            {(iHaveUpVoted || iHaveDownVoted) && <span style={{color: props.theme != null ? props.theme.commentViewDecorationHighlightColor : theme.commentViewDecorationHighlightColor}}>{upVotes - downVotes}</span>}
+                            {(!iHaveUpVoted && !iHaveDownVoted) && <span style={{color: props.theme != null ? props.theme.commentViewDecorationColor : theme.commentViewDecorationColor}}>{upVotes - downVotes}</span>}
                         </small> 
                         <small>
-                            {iHaveDownVoted && <CaretDownFill className="button_downvoted" onClick={() => {onDownVoteRemoved()}} style={{cursor: 'pointer'}}/>}
-                            {!iHaveDownVoted && <CaretDown className="button_downvote text-muted" onClick={() => {onDownVoted()}} style={{cursor: 'pointer'}}/>}
+                            {iHaveDownVoted && <CaretDownFill className="button_downvoted" onClick={() => {onDownVoteRemoved()}} style={{cursor: 'pointer', color: props.theme != null ? props.theme.commentViewDecorationHighlightColor : theme.commentViewDecorationHighlightColor}}/>}
+                            {!iHaveDownVoted && <CaretDown className="button_downvote" onClick={() => {onDownVoted()}} style={{cursor: 'pointer', color: props.theme != null ? props.theme.commentViewDecorationColor : theme.commentViewDecorationColor}}/>}
                         </small>
                     </div>}
 
                     <Container className='d-flex flex-column flex-grow-1 p-0'>
-                        {(props.replyTo != null && props.replyTo.userName != null) && <div className='p-2 rounded-3' style={{backgroundColor: theme.commentViewReplyBackgroundColor, color: '#666666', borderLeftWidth: '5px', borderLeftColor: '#888888', borderLeftStyle: 'solid', cursor: 'pointer'}} onClick={() => {onReplyToClicked()}}>
+                        {(props.replyTo != null && props.replyTo.userName != null) && <div className='p-2 rounded-3' style={{
+                            backgroundColor: props.theme.commentViewReplyToBackgroundColor != null ? props.theme.commentViewReplyToBackgroundColor : theme.commentViewReplyToBackgroundColor,
+                            color: props.theme.commentViewReplyToTitleColor != null ? props.theme.commentViewReplyToTitleColor : theme.commentViewReplyToTitleColor, 
+                            borderLeftWidth: '5px', 
+                            borderLeftColor: props.theme.commentViewReplyToTitleColor != null ? props.theme.commentViewReplyToTitleColor : theme.commentViewReplyToTitleColor, 
+                            borderLeftStyle: 'solid', 
+                            cursor: 'pointer'}} onClick={() => {onReplyToClicked()}}>
                             <div>
                                 <b>
                                 {
@@ -621,13 +633,15 @@ export const CommentView = (props) => {
                                 </small>
                             </div>
                         </div>}
-                        <div className='py-3' style={{color: '#444444'}}>
+                        <div className='py-3' style={{
+                            color: props.theme.commentViewColor != null ? props.theme.commentViewColor : theme.commentViewColor
+                            }}>
                             {
                                 textNew
                             }
                         </div>
                         {(uploadResult.length > 0) && <div className='d-flex justify-content-between'>
-                            <div className="d-flex align-items-center mb-0 px-0 pt-0 pb-2" role="alert" style={{cursor: 'pointer'}} onClick={() => {onClickAttachment()}}>
+                            <div className="d-flex align-items-center mb-0 px-0 pt-0 pb-2" role="alert" style={{cursor: 'pointer', color: props.theme != null ? props.theme.commentViewColor : theme.commentViewColor}} onClick={() => {onClickAttachment()}}>
                                 {uploadType == Constants.UPLOAD_TYPE_PDF && <FilePdf className='me-2'/>}
                                 {uploadType == Constants.UPLOAD_TYPE_IMAGE && <Image className='me-2'/>}
                                 {uploadType == Constants.UPLOAD_TYPE_VIDEO && <FilePlay className='me-2'/>}
@@ -638,59 +652,59 @@ export const CommentView = (props) => {
                                     }
                                     </small>
                                 </div>
-                                <div className='ms-2' style={{color: 'gray'}}><small><small><ArrowRight /> </small></small></div>
+                                <div className='ms-2'><small><small><ArrowRight /> </small></small></div>
                             </div>
                         </div>}
-                        {(props.showLikes || props.showDisLikes) && <div className='d-flex justify-content-end align-items-center text-muted'>
+                        <div className='d-flex justify-content-end align-items-center text-muted'>
                             
-                            <Button className="button_reply ps-0 pe-0 py-0 me-2" onClick={() => {onReplyClicked()}} variant="btn btn-outline"><small>Reply</small></Button>
-                            {props.showShare && <Dot />}
-                            {props.showShare && <Button className="button_reply ps-0 pe-0 py-0 ms-2 me-2" onClick={() => {onShareClicked()}} variant="btn btn-outline"><small>Share</small></Button>}
+                            <Button className="button_reply ps-0 pe-0 py-0 me-2" onClick={() => {onReplyClicked()}} variant="btn btn-outline" style={{color: props.theme != null ? props.theme.commentViewColor : theme.commentViewColor}}><small>Reply</small></Button>
+                            {props.showShare && <Dot style={{color: props.theme != null ? props.theme.commentViewColor : theme.commentViewColor}}/>}
+                            {props.showShare && <Button className="button_reply ps-0 pe-0 py-0 ms-2 me-2" onClick={() => {onShareClicked()}} variant="btn btn-outline" style={{color: props.theme != null ? props.theme.commentViewColor : theme.commentViewColor}}><small>Share</small></Button>}
                         
-                        </div>}
+                        </div>
                         {(props.showLikes || props.showDisLikes || props.user.timestamp != null) && <div className='d-flex justify-content-start align-items-center text-muted mt-2'>
                             
                             <div className='d-flex w-100 justify-content-end align-items-center'>
                                 
-                                {props.user.timestamp != null && <div style={{color: 'gray'}} className="me-3"><small><small>{Util.timeDifference(new Date().getTime(), parseInt(props.user.timestamp)*1000)}</small></small></div>}
-                                {edited &&  <Dot className='me-2'/>}
-                                {edited && <Button className="button_reply ps-0 pe-0 py-0 me-2" disabled={true} variant="btn btn-link"><small><small>Edited</small></small></Button>}
+                                {props.user.timestamp != null && <div style={{color: props.theme != null ? props.theme.commentViewDecorationColor : theme.commentViewDecorationColor}} className="me-3"><small><small>{Util.timeDifference(new Date().getTime(), parseInt(props.user.timestamp)*1000)}</small></small></div>}
+                                {edited &&  <Dot className='me-2' style={{color: props.theme != null ? props.theme.commentViewDecorationColor : theme.commentViewDecorationColor}}/>}
+                                {edited && <Button className="button_reply ps-0 pe-0 py-0 me-2" disabled={true} variant="btn btn-link" style={{color: props.theme != null ? props.theme.commentViewDecorationColor : theme.commentViewDecorationColor}}><small><small>Edited</small></small></Button>}
                                 {edited &&  <Dot className='me-2'/>}
                                 {props.showLikes && <div className='d-flex justify-content-start align-items-center me-4'>
                                     <small>
-                                        {(iHaveLiked) && <span style={{color: '#444'}}><HandThumbsUpFill className='button_liked me-2' style={{marginBottom: '2px', color: '#444', cursor: 'pointer'}} onClick={() => {onLikeRemoved()}}/>{likes}</span>}
-                                        {(!iHaveLiked) && <span className='text-muted'><HandThumbsUp className='button_like me-2 text-muted' style={{marginBottom: '2px', cursor: 'pointer'}} onClick={() => {onLiked()}}/>{likes}</span>}
+                                        {(iHaveLiked) && <span style={{color: props.theme != null ? props.theme.commentViewDecorationHighlightColor : theme.commentViewDecorationHighlightColor}}><HandThumbsUpFill className='button_liked me-2' style={{marginBottom: '2px', cursor: 'pointer'}} onClick={() => {onLikeRemoved()}}/>{likes}</span>}
+                                        {(!iHaveLiked) && <span style={{color: props.theme != null ? props.theme.commentViewDecorationColor : theme.commentViewDecorationColor}}><HandThumbsUp className='button_like me-2' style={{marginBottom: '2px', cursor: 'pointer'}} onClick={() => {onLiked()}}/>{likes}</span>}
                                     </small>
                                 </div>}
                                 {props.showDisLikes && <div className='d-flex justify-content-start align-items-center me-2'>
                                     <small>
-                                        {(iHaveDisLiked) && <span style={{color: '#444'}}><HandThumbsDownFill className='button_disliked me-2' style={{marginBottom: '2px', cursor: 'pointer'}} onClick={() => {onDisLikeRemoved()}}/>{disLikes}</span>}
-                                        {(!iHaveDisLiked) && <span className='text-muted'><HandThumbsDown className='button_dislike me-2 text-muted' style={{marginBottom: '2px', cursor: 'pointer'}} onClick={() => {onDisLiked()}}/>{disLikes}</span>}
+                                        {(iHaveDisLiked) && <span style={{color: props.theme != null ? props.theme.commentViewDecorationHighlightColor : theme.commentViewDecorationHighlightColor}}><HandThumbsDownFill className='button_disliked me-2' style={{marginBottom: '2px', cursor: 'pointer'}} onClick={() => {onDisLikeRemoved()}}/>{disLikes}</span>}
+                                        {(!iHaveDisLiked) && <span style={{color: props.theme != null ? props.theme.commentViewDecorationColor : theme.commentViewDecorationColor}}><HandThumbsDown className='button_dislike me-2' style={{marginBottom: '2px', cursor: 'pointer'}} onClick={() => {onDisLiked()}}/>{disLikes}</span>}
                                     </small>
                                 </div>}
                             </div>
                         </div>}
-                        {(flow === Constants.FLOW_CONFIRM_REMOVE_LIKE) && <div className='d-flex justify-content-end text-muted'>
+                        {(flow === Constants.FLOW_CONFIRM_REMOVE_LIKE) && <div className='d-flex justify-content-end' style={{color: props.theme != null ? props.theme.commentViewDecorationColor : theme.commentViewDecorationColor}}>
                             <div>
                                 <small><small><small>Press again to remove like</small></small></small>
                             </div>
                         </div>}
-                        {(flow === Constants.FLOW_CONFIRM_REMOVE_DISLIKE) && <div className='d-flex justify-content-end text-muted'>
+                        {(flow === Constants.FLOW_CONFIRM_REMOVE_DISLIKE) && <div className='d-flex justify-content-end' style={{color: props.theme != null ? props.theme.commentViewDecorationColor : theme.commentViewDecorationColor}}>
                             <div>
                                 <small><small><small>Press again to remove dislike</small></small></small>
                             </div>
                         </div>}
-                        {(flow === Constants.FLOW_CONFIRM_DELETE) && <div className='d-flex justify-content-end text-muted'>
+                        {(flow === Constants.FLOW_CONFIRM_DELETE) && <div className='d-flex justify-content-end' style={{color: props.theme != null ? props.theme.commentViewDecorationColor : theme.commentViewDecorationColor}}>
                             <div>
                                 <small><small><small>Press again to delete</small></small></small>
                             </div>
                         </div>}
-                        {(flow === Constants.FLOW_CONFIRM_REMOVE_UPVOTE) && <div className='d-flex justify-content-start text-muted'>
+                        {(flow === Constants.FLOW_CONFIRM_REMOVE_UPVOTE) && <div className='d-flex justify-content-start' style={{color: props.theme != null ? props.theme.commentViewDecorationColor : theme.commentViewDecorationColor}}>
                             <div>
                                 <small><small><small>Press again to remove upvote</small></small></small>
                             </div>
                         </div>}
-                        {(flow === Constants.FLOW_CONFIRM_REMOVE_DOWNVOTE) && <div className='d-flex justify-content-start text-muted'>
+                        {(flow === Constants.FLOW_CONFIRM_REMOVE_DOWNVOTE) && <div className='d-flex justify-content-start' style={{color: props.theme != null ? props.theme.commentViewDecorationColor : theme.commentViewDecorationColor}}>
                             <div>
                                 <small><small><small>Press again to remove downvote</small></small></small>
                             </div>
@@ -701,7 +715,13 @@ export const CommentView = (props) => {
 
                 {(flow === Constants.FLOW_INIT || flow === Constants.FLOW_UPLOAD_COMPLETE || flow === Constants.FLOW_EMOJI_PICKER || flow == Constants.FLOW_SHOW_ATTACHMENT) && <Container className='d-flex flex-column flex-grow-1 p-0 my-1'>
 
-                    {(props.replyTo != null && props.replyTo.userName != null) && <div className='p-2 rounded-3 my-2' style={{backgroundColor: theme.commentViewReplyBackgroundColor, color: '#666666', borderLeftWidth: '5px', borderLeftColor: '#888888', borderLeftStyle: 'solid', cursor: 'pointer'}} onClick={() => {onReplyToClicked()}}>
+                    {(props.replyTo != null && props.replyTo.userName != null) && <div className='p-2 rounded-3 my-2' style={{
+                            backgroundColor: props.theme.commentViewReplyToBackgroundColor != null ? props.theme.commentViewReplyToBackgroundColor : theme.commentViewReplyToBackgroundColor,
+                            color: props.theme.commentViewReplyToTitleColor != null ? props.theme.commentViewReplyToTitleColor : theme.commentViewReplyToTitleColor, 
+                            borderLeftWidth: '5px', 
+                            borderLeftColor: props.theme.commentViewReplyToTitleColor != null ? props.theme.commentViewReplyToTitleColor : theme.commentViewReplyToTitleColor, 
+                            borderLeftStyle: 'solid', 
+                            cursor: 'pointer'}}  onClick={() => {onReplyToClicked()}}>
                             <div>
                                 <b>
                                 {
@@ -740,7 +760,9 @@ export const CommentView = (props) => {
                 </Container>}
 
                 {flow === Constants.FLOW_UPLOAD_COMPLETE && <Container className='d-flex flex-row justify-content-start align-items-center ps-0 pe-0 pt-2'>
-                    <div className="d-flex alert alert-secondary align-items-center mb-0 p-0 px-2" role="alert">
+                    <div className="d-flex alert alert-secondary align-items-center mb-0 p-0 px-2" role="alert" style={{
+                            backgroundColor: props.theme.commentViewReplyToBackgroundColor != null ? props.theme.commentViewReplyToBackgroundColor : theme.commentViewReplyToBackgroundColor,
+                            color: props.theme.commentViewReplyToTitleColor != null ? props.theme.commentViewReplyToTitleColor : theme.commentViewReplyToTitleColor}} >
                         {uploadType == Constants.UPLOAD_TYPE_PDF && <FilePdf className='me-2' style={{marginBottom: '2px'}}/>}
                         {uploadType == Constants.UPLOAD_TYPE_IMAGE && <FileImage className='me-2' style={{marginBottom: '2px'}}/>}
                         {uploadType == Constants.UPLOAD_TYPE_VIDEO && <FilePlay className='me-2' style={{marginBottom: '2px'}}/>}
@@ -772,7 +794,7 @@ export const CommentView = (props) => {
                     {<Button className="btn-image" variant='btn-outline-secondary mx-2' onClick={() => {prepareUpload(Constants.UPLOAD_TYPE_IMAGE)}} style={{color: props.theme != null ? props.theme.commentViewColor : theme.commentViewColor}}>
                         <CardImage />
                     </Button>}
-                    {/* {(flow === Constants.FLOW_INIT || flow === Constants.FLOW_UPLOAD_COMPLETE) && <ButtonNeutral caption="Submit"  custom={{backgroundColor: props.theme != null ? props.theme.commentViewSubmitButtonBackgroundColor : theme.commentViewSubmitButtonBackgroundColor, color: props.theme != null ? props.theme.commentViewSubmitButtonColor : theme.commentViewSubmitButtonColor}} onClick={() => {submitResult()}} disabled={disableSubmit} icon="ArrowRight"/>} */}
+
                 </Container>}
 
                 {flow === Constants.FLOW_UPLOAD && <Container className='d-flex flex-row justify-content-end align-items-center ps-0 pe-0 pt-2 pb-2'>

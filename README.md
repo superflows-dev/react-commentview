@@ -1,6 +1,6 @@
 # react-commentview
 
-> A responsive & reusable react component that can be used as a comment box or as a comment input. It is a pure front-end component and does not require backend coding.
+> A responsive, reusable & customizable react component that can be used as a comment box or as a comment input. It is a pure front-end component and does not require backend coding.
 
 [![NPM](https://img.shields.io/npm/v/react-commentview.svg)](https://www.npmjs.com/package/react-commentview) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
@@ -50,6 +50,7 @@ Bootstrap
 - [Quickstart](#quickstart)
 - [Props](#props)
 - [More Use-Cases](#more-use-cases)
+- [Customization](#customization)
 - [AWS Configuration](#aws-configuration)
 - [Tests](#tests)
 
@@ -57,7 +58,7 @@ Bootstrap
 
 ## Introduction 
 
-Use this flexible, customizable and reusable React component to develop user comments based functionality into your application. It is packed with functionality, keeping the basic usage simple. The design is responsive and renders nicely on all screen sizes. It is designed with bootstrap. It depends on AWS for certain functionalities such as uploading and processing attachments. Please note that it is a pure front-end component and does not need backend coding. 
+Use this flexible, customizable and reusable React component to develop user comments based functionality into your application. It is packed with functionality, keeping the basic usage simple. It is designed in Bootstrap, is responsive and renders nicely on all screen sizes. Customizable color scheme allows it to seamlessly blend in to any UI. It depends on AWS serverless technologies for certain functionalities such as uploading and processing attachments. However, it is a pure front-end component and does not need backend coding. 
 
 [Back To Top ▲](#on-this-page)
 
@@ -84,6 +85,7 @@ and many more.
 
 - **Reusable** - It can be integrated easily into your react application, in any place, where a comment input or comment display, is required. It allows multiple instances on a single page.
 - **Responsive** - UI is designed in bootstrap, is fully responsive and renders nicely on all screen sizes.
+- **Customizable** - The colors scheme of this component is customizable. It can be changed for it to blend in with any UI.
 - **Pure Front-end** - This is a pure front-end react component and backend coding is not required. For certain functionalities that need a backend, AWS configuration is required and is explained in the subsequent sections.
 
 [Back To Top ▲](#on-this-page)
@@ -151,7 +153,7 @@ This component provides the following functionality:
 
 ## Quickstart
 
-Read this section to get started with the implementation. You can use this component in view, edit and delete [modes](#modes). This section will help you get started with the basic usage. After you become familiar, you can move on to explore [further features](#more-use-cases).
+Read this section to get started with the implementation. You can use this component in view, edit and delete [modes](#modes). This section will help you get started with the basic usage. After you become familiar, you can move on to explore [further features](#more-use-cases) and [customization](#customization).
 
 <br />
 
@@ -731,6 +733,100 @@ export default App
 
 <br />
 
+## Customization
+
+Appearance customization can be done using the theme object that is passed as a prop. Customizable properties of this component are listed below.
+
+- commentViewBorderColor
+- commentViewBackgroundColor
+- commentViewUserColor
+- commentViewReplyToBackgroundColor
+- commentViewReplyToTitleColor
+- commentViewColor
+- commentViewDecorationColor
+- commentViewDecorationHighlightColor
+- theme.uploadToS3BackgroundColor
+
+Before passing the theme object as prop to the component, you can change these colors as you wish so that component blends in perfectly in your user interface.
+
+### Night mode colors
+
+This example demonstrates how the theme object can be utilized to change the color scheme to night mode.
+
+<br />
+<img src="https://user-images.githubusercontent.com/108924653/186827414-607e3c41-fd24-4315-b2ad-27fdfa4143b0.png" width="450" />
+<br />
+
+```jsx
+import React from 'react'
+
+import { Col, Row, Container } from 'react-bootstrap';
+import { CommentView } from 'react-commentview'
+import Themes from 'react-ui-themes-superflows'
+import 'bootstrap/dist/css/bootstrap.min.css';
+
+const App = () => {
+
+  const theme = Themes.getTheme("Default");
+  theme.commentViewBorderColor = '#dddddd'
+  theme.commentViewBackgroundColor = '#000000'
+  theme.commentViewUserColor = '#ffffff'
+  theme.commentViewColor = '#dddddd'
+  theme.commentViewReplyToBackgroundColor = '#222222';
+  theme.commentViewReplyToTitleColor = '#cccccc';
+  theme.commentViewDecorationColor = '#ff0000';
+  theme.commentViewDecorationHighlightColor = '#00ff00';
+  theme.uploadToS3BackgroundColor = '#efefef'
+
+  return (
+
+    <Container className='mt-5'>
+      <Row className='justify-content-center'>
+        <Col sm={12} xs={12} md={6} xxl={6} >
+            <CommentView 
+                bucket="your_bucket"
+                awsRegion="your_aws_region"
+                awsKey="your_aws_key"
+                awsSecret="your_aws_secret"
+                awsMediaConvertEndPoint="https://<endpoint_prefix>.mediaconvert.<region>.amazonaws.com"
+                mediaConvertRole="mediaconvert_role"
+                cdnPrefix="your_cdn_prefix"
+                mode="view"
+                showEdit={true}
+                showDelete={true}
+                showVotes={true}
+                iHaveUpVoted={true}
+                upVotes={25}
+                downVotes={10}
+                replyTo={{userName: "Sneha G", text: "Hey buddy!"}}
+                preFill={{id: 10, text: 'Hello how are you doing? Hoping that things are going good at your end. Lets catchup soon, have something to discuss!'}}
+                user={{id: 2, name: "Hrushi M", picture: "https://image.shutterstock.com/mosaic_250/2780032/1714666150/stock-photo-head-shot-portrait-close-up-smiling-confident-businessman-wearing-glasses-looking-at-camera-1714666150.jpg", timestamp: "1660215594"}}
+                theme={theme}
+                onSubmit={(result) => {console.log('submit result', result);}}
+                onDelete={(result) => {console.log('delete result', result);}}
+                onReplied={(result) => {console.log('reply result', result);}}
+                onShared={(result) => {console.log('share result', result);}}
+                onUpVoted={(result) => {console.log('upvoted result', result);}}
+                onUpVoteRemoved={(result) => {console.log('upvote removed result', result);}}
+                onDownVoted={(result) => {console.log('downvoted result', result);}}
+                onDownVoteRemoved={(result) => {console.log('downvote removed result', result);}}
+                onReplyTo={(result) => {console.log('reply to result', result);}}
+            />
+        </Col>
+      </Row>
+    </Container>
+
+  );
+  
+}
+
+export default App
+```
+
+[Back To Top ▲](#on-this-page)
+
+<br />
+
 ## AWS Configuration
 
 ### AWS S3
@@ -833,30 +929,30 @@ Once you are through with installing the dependencies and the AWS configuration,
 
 ## Tests
 
-PASS src/index.test.js (76.095s)
-- ✓ CommentView: Render of blank edit mode (1037ms)
-- ✓ CommentView: Render of prefilled edit mode without attachment (1011ms)
-- ✓ CommentView: Render of prefilled edit mode with attachment (1015ms)
-- ✓ CommentView: Render of prefilled view mode without attachment, edit and delete (1010ms)
-- ✓ CommentView: Render of prefilled view mode with attachment and without edit and delete (1014ms)
-- ✓ CommentView: Render of prefilled view mode with attachment and with edit and delete (1012ms)
-- ✓ CommentView: Render of Uploader (12051ms)
-- ✓ CommentView: Render of Emoji picker (6145ms)
-- ✓ CommentView: Switching from View Mode To Edit Mode (4046ms)
-- ✓ CommentView: Render Likes (11065ms)
-- ✓ CommentView: Render Votes (11054ms)
-- ✓ CommentView: Text input interaction submit button (3072ms)
-- ✓ CommentView: Text input interaction enter key (3025ms)
-- ✓ CommentView: Text input interaction enter key clearOnSubmit (3024ms)
-- ✓ CommentView: Edit mode to view mode switch (3014ms)
-- ✓ CommentView: Edit mode to view mode switch with prefilled text revert (4023ms)
-- ✓ CommentView: Render of prefilled view mode with attachment and with edit and delete (6029ms)
+PASS src/index.test.js (77.093s)
+- ✓ CommentView: Render of blank edit mode (1068ms)
+- ✓ CommentView: Render of prefilled edit mode without attachment (1015ms)
+- ✓ CommentView: Render of prefilled edit mode with attachment (1029ms)
+- ✓ CommentView: Render of prefilled view mode without attachment, edit and delete (1013ms)
+- ✓ CommentView: Render of prefilled view mode with attachment and without edit and delete (1021ms)
+- ✓ CommentView: Render of prefilled view mode with attachment and with edit and delete (1023ms)
+- ✓ CommentView: Render of Uploader (12074ms)
+- ✓ CommentView: Render of Emoji picker (6454ms)
+- ✓ CommentView: Switching from View Mode To Edit Mode (4052ms)
+- ✓ CommentView: Render Likes (11075ms)
+- ✓ CommentView: Render Votes (11077ms)
+- ✓ CommentView: Text input interaction submit button (3108ms)
+- ✓ CommentView: Text input interaction enter key (3030ms)
+- ✓ CommentView: Text input interaction enter key clearOnSubmit (3030ms)
+- ✓ CommentView: Edit mode to view mode switch (3019ms)
+- ✓ CommentView: Edit mode to view mode switch with prefilled text revert (4022ms)
+- ✓ CommentView: Render of prefilled view mode with attachment and with edit and delete (6040ms)
 
 ----------------|----------|----------|----------|----------|-------------------|
 File            |  % Stmts | % Branch |  % Funcs |  % Lines | Uncovered Line #s |
 ----------------|----------|----------|----------|----------|-------------------|
-All files       |    78.53 |     74.2 |     76.4 |    78.64 |                   |
- CommentView.js |    79.17 |    75.38 |    75.58 |     79.3 |... 48,704,752,787 |
+All files       |    78.27 |    66.91 |    76.67 |    78.32 |                   |
+ CommentView.js |    78.89 |    67.65 |    75.86 |    78.95 |... 62,724,774,809 |
  Constants.js   |      100 |      100 |      100 |      100 |                   |
  Util.js        |    69.57 |    41.67 |      100 |    69.57 |... 33,37,44,45,49 |
  index.js       |        0 |        0 |        0 |        0 |                   |
@@ -864,7 +960,7 @@ All files       |    78.53 |     74.2 |     76.4 |    78.64 |                   
 Test Suites: 1 passed, 1 total
 Tests:       17 passed, 17 total
 Snapshots:   0 total
-Time:        77.629s
+Time:        78.601s
 Ran all test suites.
 
 ## License
