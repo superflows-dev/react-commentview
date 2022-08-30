@@ -1,6 +1,6 @@
 {
   "name": "react-commentview",
-  "version": "1.0.51",
+  "version": "1.0.63",
   "description": "A reusable react component to show comments or discussions on a particular topic",
   "author": "superflows-dev",
   "license": "MIT",
@@ -39,7 +39,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^3.4.1",
     "eslint-plugin-promise": "^4.3.1",
-    "eslint-plugin-react": "^7.31.0",
+    "eslint-plugin-react": "^7.31.1",
     "eslint-plugin-standard": "^4.1.0",
     "gh-pages": "^2.2.0",
     "microbundle-crl": "^0.13.11",
@@ -55,7 +55,7 @@
     "react-bootstrap": "^2.5.0",
     "react-bootstrap-icons": "^1.8.4",
     "react-ui-components-superflows": "^1.0.30",
-    "react-ui-themes-superflows": "^1.0.17",
+    "react-ui-themes-superflows": "^1.0.19",
     "react-upload-to-s3": "^1.0.12"
   },
   "files": [

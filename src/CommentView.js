@@ -20,6 +20,7 @@ export const CommentView = (props) => {
     const [showUpload, setShowUpload] = useState(false);
     const [mode, setMode] = useState(Constants.MODE_VIEW);
     const [flow, setFlow] = useState(Constants.FLOW_VIEW);
+    const [replyTo, setReplyTo] = useState('{}')
     const [edited, setEdited] = useState(false);
     const [preFill, setPreFill] = useState('{}');
     const [textNew, setTextNew] = useState('');
@@ -42,6 +43,14 @@ export const CommentView = (props) => {
     const refInputNew = useRef(null);
     const refPopup = useRef(null);
     const theme = Themes.getTheme("Default");
+
+    function setReplyToWrap(value) {
+        setReplyTo(JSON.stringify(value));
+    }
+
+    function getReplyToWrap() {
+        return JSON.parse(replyTo);
+    }
 
     function setPreFillWrap(value) {
         setPreFill(JSON.stringify(value))
@@ -158,10 +167,12 @@ export const CommentView = (props) => {
             if(props.preventEditToView) {
 
             } else {
-                setFlowWrap(Constants.FLOW_VIEW);
+                //setFlowWrap(Constants.FLOW_VIEW);
+                setMode(Constants.MODE_VIEW)
             }
         } else {
-            setFlowWrap(Constants.FLOW_VIEW);
+            // setFlowWrap(Constants.FLOW_VIEW);
+            setMode(Constants.MODE_VIEW)
         }
         if(props.clearOnSubmit) {
             setTextNew('');
@@ -237,6 +248,12 @@ export const CommentView = (props) => {
         }
     }
     
+    function onReplyToClosed() {
+        if(props.onReplyToClosed != null) {
+            props.onReplyToClosed(getCallbackInfoWrap());
+        }
+    }
+
     function onLiked() {
         if(!iHaveDisLiked) {
             if(props.onLiked != null) {
@@ -332,8 +349,8 @@ export const CommentView = (props) => {
     }
 
     function onReplyToClicked() {
-        if(props.onReplyTo != null) {
-            props.onReplyTo({callbackInfo: getCallbackInfoWrap(), replyTo: props.replyTo});
+        if(getReplyToWrap().userName != null) {
+            props.onReplyTo({callbackInfo: getCallbackInfoWrap(), replyTo: getReplyToWrap()});
         }
     }
 
@@ -477,7 +494,7 @@ export const CommentView = (props) => {
             }
         }
 
-    }, [preFill, flow, refInputNew.current, showEmoji, showAttachments, showUpload])
+    }, [preFill, flow, refInputNew.current, showEmoji, showAttachments, showUpload, replyTo])
 
     useEffect(() => {
       
@@ -540,6 +557,10 @@ export const CommentView = (props) => {
     }, [props.mode])
 
     useEffect(() => {
+        setReplyToWrap(props.replyTo != null ? props.replyTo : {})
+    }, [props.replyTo])
+
+    useEffect(() => {
         if(props.preFill != null) {
             setPreFillWrap(props.preFill);
         }
@@ -553,7 +574,7 @@ export const CommentView = (props) => {
             style={{
                 border: 'solid 1px',
                 borderColor: props.theme != null ? props.theme.commentViewBorderColor : theme.commentViewBorderColor,
-                backgroundColor: props.theme != null ? props.theme.commentViewBackgroundColor : theme.commentViewBackgroundColor,
+                backgroundColor: ((props.showEdit != null && props.showEdit) || (props.showDelete != null && props.showDelete)) ? (props.theme != null ? props.theme.commentViewMyBackgroundColor : theme.commentViewMyBackgroundColor) : (props.theme != null ? props.theme.commentViewBackgroundColor : theme.commentViewBackgroundColor),
             }}
             >
 
@@ -611,7 +632,7 @@ export const CommentView = (props) => {
                     </div>}
 
                     <Container className='d-flex flex-column flex-grow-1 p-0'>
-                        {(props.replyTo != null && props.replyTo.userName != null) && <div className='p-2 rounded-3' style={{
+                        {(getReplyToWrap().userName != null) && <div className='p-2 rounded-3 mt-3' style={{
                             backgroundColor: props.theme.commentViewReplyToBackgroundColor != null ? props.theme.commentViewReplyToBackgroundColor : theme.commentViewReplyToBackgroundColor,
                             color: props.theme.commentViewReplyToTitleColor != null ? props.theme.commentViewReplyToTitleColor : theme.commentViewReplyToTitleColor, 
                             borderLeftWidth: '5px', 
@@ -621,14 +642,14 @@ export const CommentView = (props) => {
                             <div>
                                 <b>
                                 {
-                                    props.replyTo.userName
+                                    getReplyToWrap().userName.substring(0, 40)
                                 }    
                                 </b>
                             </div>
                             <div>
                                 <small>
                                 {
-                                    props.replyTo.text.substring(0, 20)
+                                    getReplyToWrap().text.substring(0, 40)
                                 }    
                                 </small>
                             </div>
@@ -715,24 +736,29 @@ export const CommentView = (props) => {
 
                 {(flow === Constants.FLOW_INIT || flow === Constants.FLOW_UPLOAD_COMPLETE || flow === Constants.FLOW_EMOJI_PICKER || flow == Constants.FLOW_SHOW_ATTACHMENT) && <Container className='d-flex flex-column flex-grow-1 p-0 my-1'>
 
-                    {(props.replyTo != null && props.replyTo.userName != null) && <div className='p-2 rounded-3 my-2' style={{
+                    {(getReplyToWrap().userName != null) && <div className='p-2 rounded-3 my-2' style={{
                             backgroundColor: props.theme.commentViewReplyToBackgroundColor != null ? props.theme.commentViewReplyToBackgroundColor : theme.commentViewReplyToBackgroundColor,
                             color: props.theme.commentViewReplyToTitleColor != null ? props.theme.commentViewReplyToTitleColor : theme.commentViewReplyToTitleColor, 
                             borderLeftWidth: '5px', 
                             borderLeftColor: props.theme.commentViewReplyToTitleColor != null ? props.theme.commentViewReplyToTitleColor : theme.commentViewReplyToTitleColor, 
                             borderLeftStyle: 'solid', 
                             cursor: 'pointer'}}  onClick={() => {onReplyToClicked()}}>
-                            <div>
-                                <b>
+                            <div className='d-flex justify-content-between align-items-center'>
+                                <div>
                                 {
-                                    props.replyTo.userName
+                                    getReplyToWrap().userName.substring(0, 40)
                                 }    
-                                </b>
+                                </div>
+                                {props.showReplyToClose != null && props.showReplyToClose && <div className='button_replyto_close px-2' onClick={(event) => {event.stopPropagation(); onReplyToClosed()}} style={{
+                                    cursor: 'pointer'
+                                }}>
+                                    <X />
+                                </div>}
                             </div>
                             <div>
                                 <small>
                                 {
-                                    props.replyTo.text.substring(0, 20)
+                                    getReplyToWrap().text.substring(0, 40)
                                 }    
                                 </small>
                             </div>

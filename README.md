@@ -69,7 +69,7 @@ Use this flexible, customizable and reusable React component to develop user com
 Possible usage of this component includes but is not limited to the following use-cases:
 - Development of a chat / group chat / messenger module
 - Development of a web based forum module
-- Developement of a social network
+- Development of a social network
 - Development of a topic-based commenting / discussion module
 - Development of a user reviews module
 - Development of a user feedback module
@@ -85,7 +85,7 @@ and many more.
 
 - **Reusable** - It can be integrated easily into your react application, in any place, where a comment input or comment display, is required. It allows multiple instances on a single page.
 - **Responsive** - UI is designed in bootstrap, is fully responsive and renders nicely on all screen sizes.
-- **Customizable** - The colors scheme of this component is customizable. It can be changed for it to blend in with any UI.
+- **Customizable** - The color scheme of this component is customizable. It can be changed to blend in with any UI.
 - **Pure Front-end** - This is a pure front-end react component and backend coding is not required. For certain functionalities that need a backend, AWS configuration is required and is explained in the subsequent sections.
 
 [Back To Top ▲](#on-this-page)
@@ -153,7 +153,7 @@ This component provides the following functionality:
 
 ## Quickstart
 
-Read this section to get started with the implementation. You can use this component in view, edit and delete [modes](#modes). This section will help you get started with the basic usage. After you become familiar, you can move on to explore [further features](#more-use-cases) and [customization](#customization).
+Read this section to get started with the implementation. You can use this component in view, edit and delete [modes](#modes). This section will help you get started with the basic usage. After you become familiar, you can move on to explore [props](#props), [further features](#more-use-cases) and [customization](#customization).
 
 <br />
 
@@ -187,7 +187,13 @@ npm install --save react-upload-to-s3
 
 <u>AWS Configuration</u>
 
-This component uses AWS as the backend for uploading images, pdfs and videos. The [configuration section](#aws-configuration) below will help you get your AWS setup properly.
+
+Following AWS services are used by this component:
+- **IAM** for access credentials and permissions
+- **S3** for attachment storage
+- **MediaConvert** for video attachment processing
+
+The [configuration section](#aws-configuration) will help you in your AWS setup.
 
 <br />
 
@@ -214,7 +220,6 @@ After you become familiar with these use-cases, you can move on to [studying the
 <u>As a simple editor</u>
 
 <img src="https://user-images.githubusercontent.com/108924653/186572725-01530852-e28f-47ad-82c3-ed26635a1b69.png" width="450" />
-<br />
 
 ```jsx
 import React from 'react'
@@ -266,7 +271,6 @@ export default App
 <u>To display a comment</u>
 
 <img src="https://user-images.githubusercontent.com/108924653/186573883-2a51a5ea-dff8-4180-94cb-fada8dca42a5.png" width="450" />
-<br />
 
 ```jsx
 import React from 'react'
@@ -315,7 +319,6 @@ export default App
 <u>To display a deleted comment</u>
 
 <img src="https://user-images.githubusercontent.com/108924653/186575568-03d13254-9f55-401f-a08b-416c261b4c0e.png" width="450" />
-<br />
 
 ```jsx
 import React from 'react'
@@ -372,7 +375,7 @@ Please refer to the [AWS configuration](#aws-configuration) section to know how 
 | awsSecret                  | string      | aws secret (recommended that it should be stored in environment variables)
 | awsMediaConvertEndPoint    | url string  | aws media convert endpoint
 | mediaConvertRole           | string      | name of aws media convert role
-| cdnPrefix                  | url string  | prefix in case your s3 bucket is behind aa cdn
+| cdnPrefix                  | url string  | prefix in case your s3 bucket is behind a cdn
 
 <br />
 
@@ -391,14 +394,15 @@ Please refer to the [AWS configuration](#aws-configuration) section to know how 
 | showDisLikes               | boolean     | flag, which enables / disables the dislike button & functionality, in view mode
 | showVotes                  | boolean     | flag, which enables / disables the voting functionality, in view mode
 | showShare                  | boolean     | flag, which shows / hides the share button, in view mode
-| iHaveLiked                 | boolean     | flag, which sets / unsets whether the current user has liked
-| iHaveDisLiked              | boolean     | flag, which sets / unsets whether the current user has disliked
-| iHaveUpVoted               | boolean     | flag, which sets / unsets whether the current user has upvoted
-| iHaveDownVoted             | boolean     | flag, which sets / unsets whether the current user has downvoted
-| likes                      | number      | number of likes
-| disLikes                   | number      | number of dislikes
-| upVotes                    | number      | number of upvotes
-| downVotes                  | number      | number of downvotes
+| showReplyToClose           | boolean     | flag, which shows / hides the close button over the replied to section, in edit mode
+| iHaveLiked                 | boolean     | flag, which sets / unsets whether the current user has liked, in view mode
+| iHaveDisLiked              | boolean     | flag, which sets / unsets whether the current user has disliked, in view mode
+| iHaveUpVoted               | boolean     | flag, which sets / unsets whether the current user has upvoted, in view mode
+| iHaveDownVoted             | boolean     | flag, which sets / unsets whether the current user has downvoted, in view mode
+| likes                      | number      | number of likes, in view mode
+| disLikes                   | number      | number of dislikes, in view mode
+| upVotes                    | number      | number of upvotes, in view mode
+| downVotes                  | number      | number of downvotes, in view mode
 | callbackInfo               | json object | any json object can be provided, which is passed back by all callback functions
 | replyTo                    | json object | any json object representing a comment to which the current comment is a reply, should follow the template {userName: "Sneha G", text: "Hey buddy!"}
 | user                       | json object | any json object representing the current user, should follow the template {id: 2, name: "Hrushi M", picture: "picture_url", timestamp: "1660215594"}
@@ -423,6 +427,7 @@ Please refer to the [AWS configuration](#aws-configuration) section to know how 
 | onDownVoted                | callback    | gets invoked after user downvotes, in view mode
 | onDownVoteRemoved          | callback    | gets invoked after user removes downvotes, in view mode
 | onReplyTo                  | callback    | gets invoked after user clicks on the source comment, in view mode
+| onReplyToClosed            | callback    | gets invoked after user closes / removes the reply to section, in edit mode
 
 <br />
 
@@ -438,7 +443,6 @@ Please refer to the [AWS configuration](#aws-configuration) section to know how 
 ### Comment box with likes and dislikes
 
 <img src="https://user-images.githubusercontent.com/108924653/186589022-c0d205d8-2239-4682-a600-396b80b4635b.png" width="450" />
-<br />
 
 ```jsx
 import React from 'react'
@@ -490,7 +494,6 @@ export default App
 ### Comment box with voting
 
 <img src="https://user-images.githubusercontent.com/108924653/186589574-39d604c3-5d2a-4aab-8eba-bc5887560b5e.png" width="450" />
-<br />
 
 ```jsx
 import React from 'react'
@@ -542,7 +545,6 @@ export default App
 ### Editable comment box
 
 <img src="https://user-images.githubusercontent.com/108924653/186590200-bef0a6ad-6a38-465b-98f9-16a79785c9ae.png" width="450" />
-<br />
 
 ```jsx
 import React from 'react'
@@ -606,7 +608,6 @@ export default App
 ### Comment box with replied to section
 
 <img src="https://user-images.githubusercontent.com/108924653/186633738-29d64a27-954e-45d1-9edd-276ebde7269c.png" width="450" />
-<br />
 
 ```jsx
 import React from 'react'
@@ -670,7 +671,6 @@ export default App
 ### Comment editor with replied to section
 
 <img src="https://user-images.githubusercontent.com/108924653/186635243-6a7f33e4-bdc1-4fce-a721-4c2f83e9b9c6.png" width="450" />
-<br />
 
 ```jsx
 import React from 'react'
@@ -735,7 +735,7 @@ export default App
 
 ## Customization
 
-Appearance customization can be done using the theme object that is passed as a prop. Customizable properties of this component are listed below.
+Appearance customization can be done by modifying the theme object that is passed as a prop. Customizable properties of this component are listed below.
 
 - commentViewBorderColor
 - commentViewBackgroundColor
@@ -745,17 +745,17 @@ Appearance customization can be done using the theme object that is passed as a 
 - commentViewColor
 - commentViewDecorationColor
 - commentViewDecorationHighlightColor
-- theme.uploadToS3BackgroundColor
+- uploadToS3BackgroundColor
 
 Before passing the theme object as prop to the component, you can change these colors as you wish so that component blends in perfectly in your user interface.
+
+<br />
 
 ### Night mode colors
 
 This example demonstrates how the theme object can be utilized to change the color scheme to night mode.
 
-<br />
 <img src="https://user-images.githubusercontent.com/108924653/186827414-607e3c41-fd24-4315-b2ad-27fdfa4143b0.png" width="450" />
-<br />
 
 ```jsx
 import React from 'react'
@@ -948,7 +948,7 @@ PASS src/index.test.js (77.093s)
 - ✓ CommentView: Edit mode to view mode switch with prefilled text revert (4022ms)
 - ✓ CommentView: Render of prefilled view mode with attachment and with edit and delete (6040ms)
 
-----------------|----------|----------|----------|----------|-------------------|
+
 File            |  % Stmts | % Branch |  % Funcs |  % Lines | Uncovered Line #s |
 ----------------|----------|----------|----------|----------|-------------------|
 All files       |    78.27 |    66.91 |    76.67 |    78.32 |                   |
